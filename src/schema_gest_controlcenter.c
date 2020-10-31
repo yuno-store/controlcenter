@@ -39,12 +39,51 @@
 
 */
 
-static char schema_fichador_gest[]= "\
+static char schema_gest_controlcenter[]= "\
 {                                                                   \n\
     'id': 'gest_controlcenter',                                     \n\
     'schema_type': 'treedbs',                                       \n\
     'schema_version': '1',                                          \n\
     'topics': [                                                     \n\
+        {                                                           \n\
+            'topic_name': 'gest_services',                          \n\
+            'pkey': 'id',                                           \n\
+            'system_flag': 'sf_string_key',                         \n\
+            'topic_version': '1',                                   \n\
+            'cols': {                                               \n\
+                'id': {                                             \n\
+                    'header': 'Id',                                 \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','required']               \n\
+                },                                                  \n\
+                'url': {                                            \n\
+                    'header': 'Url',                                \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','required','writable']    \n\
+                },                                                  \n\
+                'yuno_name': {                                      \n\
+                    'header': 'Yuno Name',                          \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','required','writable']    \n\
+                },                                                  \n\
+                'yuno_role': {                                      \n\
+                    'header': 'Yuno Role',                          \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','required','writable']    \n\
+                },                                                  \n\
+                'yuno_service': {                                   \n\
+                    'header': 'Yuno Service',                       \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','required','writable']    \n\
+                }                                                   \n\
+            }                                                       \n\
+        },                                                          \n\
+                                                                    \n\
         {                                                           \n\
             'topic_name': 'gest_roles',                             \n\
             'pkey': 'id',                                           \n\

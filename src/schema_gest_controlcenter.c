@@ -63,12 +63,6 @@ static char schema_gest_controlcenter[]= "\
                     'fillspace': 10,                                \n\
                     'flag': ['persistent','required','writable']    \n\
                 },                                                  \n\
-                'yuno_name': {                                      \n\
-                    'header': 'Yuno Name',                          \n\
-                    'type': 'string',                               \n\
-                    'fillspace': 10,                                \n\
-                    'flag': ['persistent','writable']               \n\
-                },                                                  \n\
                 'yuno_role': {                                      \n\
                     'header': 'Yuno Role',                          \n\
                     'type': 'string',                               \n\
@@ -80,6 +74,12 @@ static char schema_gest_controlcenter[]= "\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': ['persistent','required','writable']    \n\
+                },                                                  \n\
+                'yuno_name': {                                      \n\
+                    'header': 'Yuno Name',                          \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','writable']               \n\
                 }                                                   \n\
             }                                                       \n\
         },                                                          \n\

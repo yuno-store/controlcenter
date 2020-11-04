@@ -269,12 +269,6 @@ PRIVATE int mt_play(hgobj gobj)
     gobj_start(priv->gobj_tranger_dba);
     priv->tranger = gobj_read_pointer_attr(priv->gobj_tranger_dba, "tranger");
 
-    /*
-     *  Registra tranger en 2key (in-memory double-key) para su acceso externo
-     *  TODO elimina cuando c_tranger esté completa
-     */
-    gobj_2key_register("tranger", "controlcenter", priv->tranger);
-
     if(1) {
         /*---------------------------*
          *  Open topics as messages
@@ -328,7 +322,7 @@ PRIVATE int mt_play(hgobj gobj)
         );
 
         priv->treedb_gest = gobj_create_service(
-            "treedb",
+            treedb_name,
             GCLASS_NODE,
             kw_resource,
             gobj
@@ -361,7 +355,6 @@ PRIVATE int mt_pause(hgobj gobj)
     gobj_stop(priv->gobj_tranger_dba);
     EXEC_AND_RESET(gobj_destroy, priv->gobj_tranger_dba);
     priv->tranger = 0;
-    gobj_2key_deregister("tranger", "controlcenter"); // TODO elimina cuando c_tranger esté completa
 
     clear_timeout(priv->timer);
     return 0;

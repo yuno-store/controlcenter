@@ -43,22 +43,22 @@ static char schema_gest_controlcenter[]= "\
 {                                                                   \n\
     'id': 'gest_controlcenter',                                     \n\
     'schema_type': 'treedbs',                                       \n\
-    'schema_version': '5',                                          \n\
+    'schema_version': '1',                                          \n\
     'topics': [                                                     \n\
         {                                                           \n\
             'topic_name': 'gest_systems',                           \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '5',                                   \n\
+            'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
-                    'header': 'Id',                                 \n\
+                    'header': 'Name',                               \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': ['persistent','required']               \n\
                 },                                                  \n\
-                'name': {                                           \n\
-                    'header': 'Name',                               \n\
+                'description': {                                    \n\
+                    'header': 'Description',                        \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': ['persistent','required','writable']    \n\
@@ -109,13 +109,19 @@ static char schema_gest_controlcenter[]= "\
             'topic_name': 'gest_services',                          \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '5',                                   \n\
+            'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
-                    'header': 'Id',                                 \n\
+                    'header': 'Name',                               \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': ['persistent','required']               \n\
+                },                                                  \n\
+                'description': {                                    \n\
+                    'header': 'Description',                        \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','required','writable']    \n\
                 },                                                  \n\
                 'url': {                                            \n\
                     'header': 'Url',                                \n\
@@ -160,7 +166,7 @@ static char schema_gest_controlcenter[]= "\
             'topic_name': 'gest_roles',                             \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '5',                                   \n\
+            'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Id',                                 \n\
@@ -196,7 +202,7 @@ static char schema_gest_controlcenter[]= "\
             'topic_name': 'gest_departments',                       \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '5',                                   \n\
+            'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Id',                                 \n\
@@ -257,7 +263,7 @@ static char schema_gest_controlcenter[]= "\
             'topic_name': 'gest_users',                             \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '5',                                   \n\
+            'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Id',                                 \n\

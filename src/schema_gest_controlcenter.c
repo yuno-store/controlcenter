@@ -43,13 +43,13 @@ static char schema_gest_controlcenter[]= "\
 {                                                                   \n\
     'id': 'gest_controlcenter',                                     \n\
     'schema_type': 'treedbs',                                       \n\
-    'schema_version': '1',                                          \n\
+    'schema_version': '5',                                          \n\
     'topics': [                                                     \n\
         {                                                           \n\
             'topic_name': 'gest_systems',                           \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '5',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Id',                                 \n\
@@ -63,7 +63,6 @@ static char schema_gest_controlcenter[]= "\
                     'fillspace': 10,                                \n\
                     'flag': ['persistent','required','writable']    \n\
                 },                                                  \n\
-                                                                    \n\
                 'system_id': {                                      \n\
                     'header': 'Top System',                         \n\
                     'type': 'string',                               \n\
@@ -96,6 +95,12 @@ static char schema_gest_controlcenter[]= "\
                     'hook': {                                       \n\
                         'gest_users': 'departments'                 \n\
                     }                                               \n\
+                },                                                  \n\
+                '_geometry': {                                      \n\
+                    'header': 'Geometry',                           \n\
+                    'type': 'blob',                                 \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','writable']               \n\
                 }                                                   \n\
             }                                                       \n\
         },                                                          \n\
@@ -104,7 +109,7 @@ static char schema_gest_controlcenter[]= "\
             'topic_name': 'gest_services',                          \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '5',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Id',                                 \n\
@@ -141,6 +146,12 @@ static char schema_gest_controlcenter[]= "\
                     'type': 'array',                                \n\
                     'fillspace': 4,                                 \n\
                     'flag': ['fkey','persistent','required','writable'] \n\
+                },                                                  \n\
+                '_geometry': {                                      \n\
+                    'header': 'Geometry',                           \n\
+                    'type': 'blob',                                 \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','writable']               \n\
                 }                                                   \n\
             }                                                       \n\
         },                                                          \n\
@@ -149,7 +160,7 @@ static char schema_gest_controlcenter[]= "\
             'topic_name': 'gest_roles',                             \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '5',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Id',                                 \n\
@@ -171,6 +182,12 @@ static char schema_gest_controlcenter[]= "\
                     'hook': {                                       \n\
                         'gest_users': 'roles'                       \n\
                     }                                               \n\
+                },                                                  \n\
+                '_geometry': {                                      \n\
+                    'header': 'Geometry',                           \n\
+                    'type': 'blob',                                 \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','writable']               \n\
                 }                                                   \n\
             }                                                       \n\
         },                                                          \n\
@@ -179,7 +196,7 @@ static char schema_gest_controlcenter[]= "\
             'topic_name': 'gest_departments',                       \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '5',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Id',                                 \n\
@@ -193,7 +210,6 @@ static char schema_gest_controlcenter[]= "\
                     'fillspace': 10,                                \n\
                     'flag': ['persistent','required','writable']    \n\
                 },                                                  \n\
-                                                                    \n\
                 'department_id': {                                  \n\
                     'header': 'Top Department',                     \n\
                     'type': 'string',                               \n\
@@ -227,6 +243,12 @@ static char schema_gest_controlcenter[]= "\
                         'gest_users': 'manager',                    \n\
                         'gest_departments': 'users'                 \n\
                     }                                               \n\
+                },                                                  \n\
+                '_geometry': {                                      \n\
+                    'header': 'Geometry',                           \n\
+                    'type': 'blob',                                 \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','writable']               \n\
                 }                                                   \n\
             }                                                       \n\
         },                                                          \n\
@@ -235,7 +257,7 @@ static char schema_gest_controlcenter[]= "\
             'topic_name': 'gest_users',                             \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '5',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Id',                                 \n\
@@ -291,6 +313,12 @@ static char schema_gest_controlcenter[]= "\
                     'fillspace': 1,                                 \n\
                     'flag': []                                      \n\
                 },                                                  \n\
+                'roles': {                                          \n\
+                    'header': 'Roles',                              \n\
+                    'type': 'array',                                \n\
+                    'fillspace': 4,                                 \n\
+                    'flag': ['fkey','persistent','required','writable'] \n\
+                },                                                  \n\
                 'departments': {                                    \n\
                     'header': 'Department',                         \n\
                     'type': 'array',                                \n\
@@ -345,11 +373,11 @@ static char schema_gest_controlcenter[]= "\
                     'fillspace': 2,                                 \n\
                     'flag': ['persistent','required','writable']    \n\
                 },                                                  \n\
-                'roles': {                                          \n\
-                    'header': 'Roles',                              \n\
-                    'type': 'array',                                \n\
-                    'fillspace': 4,                                 \n\
-                    'flag': ['fkey','persistent','required','writable'] \n\
+                '_geometry': {                                      \n\
+                    'header': 'Geometry',                           \n\
+                    'type': 'blob',                                 \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['persistent','writable']               \n\
                 }                                                   \n\
             }                                                       \n\
         }                                                           \n\

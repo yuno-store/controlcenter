@@ -61,7 +61,7 @@ static char schema_gest_controlcenter[]= "\
                     'header': 'Description',                        \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
-                    'flag': ['persistent','required','writable']    \n\
+                    'flag': ['persistent','writable']               \n\
                 },                                                  \n\
                 'system_id': {                                      \n\
                     'header': 'Top System',                         \n\
@@ -121,7 +121,7 @@ static char schema_gest_controlcenter[]= "\
                     'header': 'Description',                        \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
-                    'flag': ['persistent','required','writable']    \n\
+                    'flag': ['persistent','writable']               \n\
                 },                                                  \n\
                 'url': {                                            \n\
                     'header': 'Url',                                \n\
@@ -169,16 +169,16 @@ static char schema_gest_controlcenter[]= "\
             'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
-                    'header': 'Id',                                 \n\
+                    'header': 'Name',                               \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': ['persistent','required']               \n\
                 },                                                  \n\
-                'name': {                                           \n\
-                    'header': 'Name',                               \n\
+                'description': {                                    \n\
+                    'header': 'Description',                        \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
-                    'flag': ['persistent','required','writable']    \n\
+                    'flag': ['persistent','writable']               \n\
                 },                                                  \n\
                 'users': {                                          \n\
                     'header': 'Users',                              \n\

@@ -150,8 +150,8 @@ static char schema_gest_controlcenter[]= "\
                 'systems': {                                        \n\
                     'header': 'Systems',                            \n\
                     'type': 'array',                                \n\
-                    'fillspace': 4,                                 \n\
-                    'flag': ['fkey','persistent','required','writable'] \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['fkey','writable']                     \n\
                 },                                                  \n\
                 '_geometry': {                                      \n\
                     'header': 'Geometry',                           \n\
@@ -323,19 +323,19 @@ static char schema_gest_controlcenter[]= "\
                     'header': 'Roles',                              \n\
                     'type': 'array',                                \n\
                     'fillspace': 4,                                 \n\
-                    'flag': ['fkey','persistent','required','writable'] \n\
+                    'flag': ['fkey','writable']                     \n\
                 },                                                  \n\
                 'departments': {                                    \n\
                     'header': 'Department',                         \n\
                     'type': 'array',                                \n\
                     'fillspace': 4,                                 \n\
-                    'flag': ['fkey','persistent','required','writable'] \n\
+                    'flag': ['fkey','writable']                     \n\
                 },                                                  \n\
                 'manager': {                                        \n\
                     'header': 'Manager',                            \n\
                     'type': 'array',                                \n\
                     'fillspace': 4,                                 \n\
-                    'flag': ['fkey','persistent','required','writable'] \n\
+                    'flag': ['fkey','writable']                     \n\
                 },                                                  \n\
                 'proyecto': {                                       \n\
                     'header': 'Proyecto',                           \n\

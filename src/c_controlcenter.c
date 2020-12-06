@@ -117,7 +117,7 @@ typedef struct _PRIVATE_DATA {
     oauth2_log_t *oath2_log;
     oauth2_log_sink_t *oath2_sink;
 
-    hgobj gobj_tranger_dba;
+    hgobj gobj_tranger;
     json_t *tranger;
     json_t *users_accesses;      // dict with users opened
 
@@ -260,14 +260,14 @@ PRIVATE int mt_play(hgobj gobj)
         "subscriber", (json_int_t)(size_t)gobj,
         "on_critical_error", (int)(LOG_OPT_EXIT_ZERO)
     );
-    priv->gobj_tranger_dba = gobj_create_service(
-        "tranger_dbas",
+    priv->gobj_tranger = gobj_create_service(
+        "tranger",
         GCLASS_TRANGER,
         kw_tranger,
         gobj
     );
-    gobj_start(priv->gobj_tranger_dba);
-    priv->tranger = gobj_read_pointer_attr(priv->gobj_tranger_dba, "tranger");
+    gobj_start(priv->gobj_tranger);
+    priv->tranger = gobj_read_pointer_attr(priv->gobj_tranger, "tranger");
 
     if(1) {
         /*---------------------------*
@@ -352,8 +352,8 @@ PRIVATE int mt_pause(hgobj gobj)
     /*---------------------------*
      *      Close Timeranger
      *---------------------------*/
-    gobj_stop(priv->gobj_tranger_dba);
-    EXEC_AND_RESET(gobj_destroy, priv->gobj_tranger_dba);
+    gobj_stop(priv->gobj_tranger);
+    EXEC_AND_RESET(gobj_destroy, priv->gobj_tranger);
     priv->tranger = 0;
 
     clear_timeout(priv->timer);

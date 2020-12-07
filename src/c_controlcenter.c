@@ -154,7 +154,6 @@ PRIVATE void mt_create(hgobj gobj)
     if(!jn_schema_gest_controlcenter) {
         exit(-1);
     }
-    json_decref(jn_schema_gest_controlcenter);
 
     int level = OAUTH2_LOG_WARN;
     priv->oath2_sink = oauth2_log_sink_create(
@@ -167,6 +166,60 @@ PRIVATE void mt_create(hgobj gobj)
     priv->timer = gobj_create(gobj_name(gobj), GCLASS_TIMER, 0, gobj);
     priv->ptxMsgs = gobj_danger_attr_ptr(gobj, "txMsgs");
     priv->prxMsgs = gobj_danger_attr_ptr(gobj, "rxMsgs");
+
+    /*---------------------------*
+     *  Create Timeranger
+     *---------------------------*/
+    const char *company = gobj_read_str_attr(gobj, "company");
+    if(empty_string(company)) {
+        log_critical(LOG_OPT_EXIT_ZERO,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "Attribute 'company' is REQUIRED!",
+            NULL
+        );
+    }
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path),
+        "/yuneta/store/controlcenter/%s/%s",
+        company,
+        gobj_yuno_role_plus_name()
+    );
+    json_t *kw_tranger = json_pack("{s:s, s:s, s:b, s:i}",
+        "path", path,
+        "filename_mask", "%Y",
+        "master", 1,
+        "on_critical_error", (int)(LOG_OPT_EXIT_ZERO)
+    );
+    priv->gobj_tranger = gobj_create_service(
+        "tranger",
+        GCLASS_TRANGER,
+        kw_tranger,
+        gobj
+    );
+
+    /*----------------------*
+     *  Create Treedb
+     *----------------------*/
+    const char *treedb_name = kw_get_str(
+        jn_schema_gest_controlcenter,
+        "id",
+        "gest_controlcenter",
+        KW_REQUIRED
+    );
+    json_t *kw_resource = json_pack("{s:s, s:o, s:i}",
+        "treedb_name", treedb_name,
+        "treedb_schema", jn_schema_gest_controlcenter,
+        "exit_on_error", LOG_OPT_EXIT_ZERO
+    );
+
+    priv->treedb_gest = gobj_create_service(
+        treedb_name,
+        GCLASS_NODE,
+        kw_resource,
+        gobj
+    );
 
     /*
      *  Do copy of heavy used parameters, for quick access.
@@ -229,49 +282,18 @@ PRIVATE int mt_play(hgobj gobj)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
-    const char *company = gobj_read_str_attr(gobj, "company");
-    if(empty_string(company)) {
-        log_critical(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "Attribute 'company' is REQUIRED! Cannot play the yuno",
-            NULL
-        );
-        return -1;
-    }
-
-    priv->gobj_top_side = gobj_find_service("__top_side__", TRUE);
-    gobj_subscribe_event(priv->gobj_top_side, 0, 0, gobj);
-
-    /*---------------------------*
-     *      Open Timeranger
-     *---------------------------*/
-    char path[PATH_MAX];
-    snprintf(path, sizeof(path),
-        "/yuneta/store/controlcenter/%s/%s",
-        company,
-        gobj_yuno_role_plus_name()
-    );
-    json_t *kw_tranger = json_pack("{s:s, s:s, s:b, s:I, s:i}",
-        "path", path,
-        "filename_mask", "%Y",
-        "master", 1,
-        "subscriber", (json_int_t)(size_t)gobj,
-        "on_critical_error", (int)(LOG_OPT_EXIT_ZERO)
-    );
-    priv->gobj_tranger = gobj_create_service(
-        "tranger",
-        GCLASS_TRANGER,
-        kw_tranger,
-        gobj
-    );
+    /*
+     *  Start tranger/treedb
+     */
     gobj_start(priv->gobj_tranger);
     priv->tranger = gobj_read_pointer_attr(priv->gobj_tranger, "tranger");
+    gobj_write_pointer_attr(priv->treedb_gest, "tranger", priv->tranger);
+    gobj_start(priv->treedb_gest);
 
     if(1) {
         /*---------------------------*
          *  Open topics as messages
+         *  TODO crea gclass para trmsg
          *---------------------------*/
         trmsg_open_topics(
             priv->tranger,
@@ -303,35 +325,12 @@ PRIVATE int mt_play(hgobj gobj)
         }
     }
 
-    if(!priv->treedb_gest) {
-        /*----------------------*
-         *      Open Treedb
-         *----------------------*/
-        json_t *jn_schema_gest_controlcenter = legalstring2json(schema_gest_controlcenter, TRUE);
-        const char *treedb_name = kw_get_str(
-            jn_schema_gest_controlcenter,
-            "id",
-            "gest_controlcenter",
-            KW_REQUIRED
-        );
-        json_t *kw_resource = json_pack("{s:I, s:s, s:o, s:i}",
-            "tranger", (json_int_t)(size_t)priv->tranger,
-            "treedb_name", treedb_name,
-            "treedb_schema", jn_schema_gest_controlcenter,
-            "exit_on_error", LOG_OPT_EXIT_ZERO
-        );
-
-        priv->treedb_gest = gobj_create_service(
-            treedb_name,
-            GCLASS_NODE,
-            kw_resource,
-            gobj
-        );
-    }
-    if(priv->treedb_gest) {
-        gobj_start(priv->treedb_gest);
-        gobj_start_tree(priv->gobj_top_side);
-    }
+    /*
+     *  Start __top_side__
+     */
+    priv->gobj_top_side = gobj_find_service("__top_side__", TRUE);
+    gobj_subscribe_event(priv->gobj_top_side, 0, 0, gobj);
+    gobj_start_tree(priv->gobj_top_side);
 
     return 0;
 }
@@ -343,17 +342,17 @@ PRIVATE int mt_pause(hgobj gobj)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
-    gobj_stop(priv->treedb_gest);
-    EXEC_AND_RESET(gobj_destroy, priv->treedb_gest);
-
+    /*
+     *  Stop __top_side__
+     */
     gobj_unsubscribe_event(priv->gobj_top_side, 0, 0, gobj);
     EXEC_AND_RESET(gobj_stop_tree, priv->gobj_top_side);
 
-    /*---------------------------*
-     *      Close Timeranger
-     *---------------------------*/
+    /*
+     *  Stop treeb/tranger
+     */
+    gobj_stop(priv->treedb_gest);
     gobj_stop(priv->gobj_tranger);
-    EXEC_AND_RESET(gobj_destroy, priv->gobj_tranger);
     priv->tranger = 0;
 
     clear_timeout(priv->timer);

@@ -269,7 +269,7 @@ static char schema_gest_controlcenter[]= "\
                     'header': 'Id',                                 \n\
                     'type': 'string',                               \n\
                     'fillspace': 5,                                 \n\
-                    'flag': ['persistent','required','email]        \n\
+                    'flag': ['persistent','required','email']       \n\
                 },                                                  \n\
                 'uuid': {                                           \n\
                     'header': 'Subject',                            \n\

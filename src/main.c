@@ -18,7 +18,7 @@
 #define APP_NAME        ROLE_CONTROLCENTER
 #define APP_DOC         "Control Center of Yuneta Systems"
 
-#define APP_VERSION     "4.2.27"
+#define APP_VERSION     "4.2.28"
 #define APP_SUPPORT     "<niyamaka at yuneta.io>"
 #define APP_DATETIME    __DATE__ " " __TIME__
 

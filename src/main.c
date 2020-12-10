@@ -51,7 +51,7 @@ PRIVATE char variable_config[]= "\
         'daemon_log_handlers': {                                    \n\
             'to_file': {                                            \n\
                 'handler_type': 'file',                             \n\
-                'filename_mask': 'controlcenter-MM-DD.log',          \n\
+                'filename_mask': 'controlcenter-MM-DD.log',         \n\
                 'handler_options': 255                              \n\
             },                                                      \n\
             'to_udp': {                                             \n\
@@ -77,8 +77,8 @@ PRIVATE char variable_config[]= "\
     },                                                              \n\
     'services': [                                                   \n\
         {                                                           \n\
-            'name': 'controlcenter',                                 \n\
-            'gclass': 'Controlcenter',                               \n\
+            'name': 'controlcenter',                                \n\
+            'gclass': 'Controlcenter',                              \n\
             'default_service': true,                                \n\
             'autostart': true,                                      \n\
             'autoplay': false,                                      \n\

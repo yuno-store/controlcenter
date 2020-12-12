@@ -15,6 +15,8 @@
 #include <uuid/uuid.h>
 #include "c_controlcenter.h"
 
+#include "schema_gest_controlcenter.c"
+
 /***************************************************************************
  *              Constants
  ***************************************************************************/
@@ -49,8 +51,6 @@ PRIVATE topic_desc_t db_fichador_desc[] = {
     {"users_accesses",      "username",     sf_string_key,  "tm",       0},
     {0}
 };
-
-#include "schema_gest_controlcenter.c"
 
 PRIVATE json_t *cmd_help(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 

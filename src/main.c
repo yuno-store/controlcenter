@@ -186,7 +186,11 @@ int main(int argc, char *argv[])
      *------------------------------------------------*/
     helper_quote2doublequote(fixed_config);
     helper_quote2doublequote(variable_config);
-    yuneta_startup(
+    yuneta_setup(
+        treedb_load_persistent_attrs,
+        treedb_save_persistent_attrs,
+        treedb_remove_persistent_attrs,
+        treedb_list_persistent_attrs,
         command_parser,
         stats_parser,
         authorization_parser

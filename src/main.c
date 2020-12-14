@@ -8,7 +8,6 @@
  *          All Rights Reserved.
  ****************************************************************************/
 #include <yuneta_tls.h>
-#include <yuneta.h>
 #include "c_controlcenter.h"
 #include "yuno_controlcenter.h"
 
@@ -193,7 +192,9 @@ int main(int argc, char *argv[])
         treedb_list_persistent_attrs,
         command_parser,
         stats_parser,
-        authorization_parser
+        authz_checker,
+        authz_allow,
+        authz_deny
     );
     return yuneta_entry_point(
         argc, argv,

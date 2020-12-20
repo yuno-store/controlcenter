@@ -73,6 +73,32 @@ PRIVATE char variable_config[]= "\
         }                                                           \n\
     },                                                              \n\
     'global': {                                                     \n\
+        'Controlcenter.jwt_public_key': '-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj0ZkOtmWlsDLJiJWXTEJ\\ntyXxlVY7iLseG982eaFgDaAdtE3Z5J+WDvzni7v4MPR55oMyi/oeAvTKIsVOv3aw\\nobRJ/Mr45Qh6I0j4Hn+rFfPW4wbmxRmFeyRrfMzYAZZoibZ3m7EFlj2RINvJFIgE\\npIoTf4UneXmlSDbUU9MTZe1mULfCfEZVa5V9W86BluAAib1mYJU7aJ20KPkbQAvW\\nXqC82AE9ga66HnQ2n56mv1kPyvNGKvvM6vD2IXQeLIYgudYT2KlGKd8isrOEkrno\\nXtPKMSaRhVccO73Wbo7krhjGV5MTpMvvOM+wDprslFkODm0MORsHORVxfcVGWSpU\\ngQIDAQAB\\n-----END PUBLIC KEY-----\\n', \n\
+                                                                    \n\
+        'Authz.initial_load': {                                     \n\
+            'roles': [                                              \n\
+                {                                                   \n\
+                    'id': 'owner',                                  \n\
+                    'description': 'Owner of system'                \n\
+                }                                                   \n\
+            ],                                                      \n\
+            'users': [                                              \n\
+                {                                                   \n\
+                    'id': 'yuneta',                                 \n\
+                    'role_id': 'owner',                             \n\
+                    'system_user': true                             \n\
+                }                                                   \n\
+            ],                                                      \n\
+            'authorizations': [                                     \n\
+                {                                                   \n\
+                    'id': '__allow_all__',                          \n\
+                    'role_id': 'owner',                             \n\
+                    'context': '*',     #^^ gclass/service          \n\
+                    'allow': true,                                  \n\
+                    'constraints': {}                               \n\
+                }                                                   \n\
+            ]                                                       \n\
+        }                                                           \n\
     },                                                              \n\
     'services': [                                                   \n\
         {                                                           \n\
@@ -82,7 +108,6 @@ PRIVATE char variable_config[]= "\
             'autostart': true,                                      \n\
             'autoplay': false,                                      \n\
             'kw': {                                                 \n\
-                'jwt_public_key': '-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj0ZkOtmWlsDLJiJWXTEJ\\ntyXxlVY7iLseG982eaFgDaAdtE3Z5J+WDvzni7v4MPR55oMyi/oeAvTKIsVOv3aw\\nobRJ/Mr45Qh6I0j4Hn+rFfPW4wbmxRmFeyRrfMzYAZZoibZ3m7EFlj2RINvJFIgE\\npIoTf4UneXmlSDbUU9MTZe1mULfCfEZVa5V9W86BluAAib1mYJU7aJ20KPkbQAvW\\nXqC82AE9ga66HnQ2n56mv1kPyvNGKvvM6vD2IXQeLIYgudYT2KlGKd8isrOEkrno\\nXtPKMSaRhVccO73Wbo7krhjGV5MTpMvvOM+wDprslFkODm0MORsHORVxfcVGWSpU\\ngQIDAQAB\\n-----END PUBLIC KEY-----\\n' \n\
             },                                                      \n\
             'zchilds': [                                            \n\
             ]                                                       \n\
@@ -94,30 +119,6 @@ PRIVATE char variable_config[]= "\
             'autostart': true,                                      \n\
             'autoplay': true,                                       \n\
             'kw': {                                                 \n\
-                'initial_load': [                                       \n\
-                    {                                                   \n\
-                        'id': 'yuneta',             #^^ user            \n\
-                        'system_user': true,                            \n\
-                        'permissions': [                                \n\
-                            {                                           \n\
-                                'id': '*',          #^^ gclass/service  \n\
-                                'allow': true,                          \n\
-                                'constraints': {}                       \n\
-                            }                                           \n\
-                        ]                                               \n\
-                    },                                                  \n\
-                    {                                                   \n\
-                        'id': 'ginsmar@mulesol.es', #^^ user            \n\
-                        'system_user': false,                           \n\
-                        'permissions': [                                \n\
-                            {                                           \n\
-                                'id': '*',          #^^ gclass/service  \n\
-                                'allow': true,                          \n\
-                                'constraints': {}                       \n\
-                            }                                           \n\
-                        ]                                               \n\
-                    }                                                   \n\
-                ]                                                       \n\
             },                                                      \n\
             'zchilds': [                                            \n\
             ]                                                       \n\
@@ -195,8 +196,6 @@ int main(int argc, char *argv[])
         command_parser,
         stats_parser,
         authz_checker,
-        authz_allow,
-        authz_deny,
         authzs_list
     );
     return yuneta_entry_point(

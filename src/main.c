@@ -79,20 +79,21 @@ PRIVATE char variable_config[]= "\
             'roles': [                                              \n\
                 {                                                   \n\
                     'id': 'owner',                                  \n\
+                    'disabled': false,                              \n\
                     'description': 'Owner of system'                \n\
                 }                                                   \n\
             ],                                                      \n\
             'users': [                                              \n\
                 {                                                   \n\
                     'id': 'yuneta',                                 \n\
-                    'role_id': 'owner',                             \n\
+                    'role_id': 'roles^owner^users',                 \n\
                     'system_user': true                             \n\
                 }                                                   \n\
             ],                                                      \n\
             'authorizations': [                                     \n\
                 {                                                   \n\
                     'id': '__allow_all__',                          \n\
-                    'role_id': 'owner',                             \n\
+                    'role_id': 'roles^owner^authorizations',        \n\
                     'context': '*',     #^^ gclass/service          \n\
                     'allow': true,                                  \n\
                     'constraints': {}                               \n\
@@ -157,7 +158,7 @@ int main(int argc, char *argv[])
      *  To trace memory
      *------------------------------------------------*/
 #ifdef DEBUG
-    static uint32_t mem_list[] = {0};
+    static uint32_t mem_list[] = {16336, 0};
     gbmem_trace_alloc_free(0, mem_list);
 #endif
 
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
 //     gobj_set_gobj_trace(0, "ev_kw", TRUE, 0);
 //     gobj_set_gobj_trace(0, "libuv", TRUE, 0);
 
-    set_auto_kill_time(5);
+    //set_auto_kill_time(5);
 
     /*------------------------------------------------*
      *          Start yuneta

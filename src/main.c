@@ -17,7 +17,7 @@
 #define APP_NAME        ROLE_CONTROLCENTER
 #define APP_DOC         "Control Center of Yuneta Systems"
 
-#define APP_VERSION     "4.3.4"
+#define APP_VERSION     "4.4.0"
 #define APP_SUPPORT     "<niyamaka at yuneta.io>"
 #define APP_DATETIME    __DATE__ " " __TIME__
 
@@ -86,14 +86,14 @@ PRIVATE char variable_config[]= "\
             'users': [                                              \n\
                 {                                                   \n\
                     'id': 'yuneta',                                 \n\
-                    'role_id': 'roles^owner^users',                 \n\
+                    'role_id': ['roles^owner^users'],               \n\
                     'system_user': true                             \n\
                 }                                                   \n\
             ],                                                      \n\
             'authorizations': [                                     \n\
                 {                                                   \n\
                     'id': '__allow_all__',                          \n\
-                    'role_id': 'roles^owner^authorizations',        \n\
+                    'role_id': ['roles^owner^authorizations'],      \n\
                     'context': '*',     #^^ gclass/service          \n\
                     'allow': true,                                  \n\
                     'constraints': {}                               \n\

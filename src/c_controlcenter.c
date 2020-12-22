@@ -401,7 +401,6 @@ PRIVATE json_t *mt_authenticate(hgobj gobj, const char *service, json_t *kw, hgo
             kw  // owned
         );
     }
-
     oauth2_cfg_token_verify_free(priv->oath2_log, verify);
 
     // HACK guarda jwt_payload (user y session) en channel_gobj

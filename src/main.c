@@ -167,6 +167,9 @@ int main(int argc, char *argv[])
      *------------------------------------------------*/
     gobj_set_gclass_no_trace(GCLASS_TIMER, "machine", TRUE);  // Avoid timer trace, too much information
 
+    gobj_set_gclass_trace(GCLASS_IEVENT_SRV, "identity-card", TRUE);
+    gobj_set_gclass_trace(GCLASS_IEVENT_CLI, "identity-card", TRUE);
+
 // Samples
 //     gobj_set_gclass_trace(GCLASS_IEVENT_CLI, "ievents2", TRUE);
 //     gobj_set_gclass_trace(GCLASS_IEVENT_SRV, "ievents2", TRUE);

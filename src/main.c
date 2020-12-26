@@ -116,7 +116,7 @@ PRIVATE char variable_config[]= "\
                     'role_id': ['roles^root^users']                 \n\
                 },                                                  \n\
                 {                                                   \n\
-                    'id': 'ginsmar@yuneta.io',      #^^ TODO TEST   \n\
+                    'id': 'ginsmar@mulesol.es',     #^^ TODO TEST   \n\
                     'role_id': ['roles^owner^users']                \n\
                 },                                                  \n\
                 {                                                   \n\

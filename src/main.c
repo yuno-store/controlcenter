@@ -80,9 +80,10 @@ PRIVATE char variable_config[]= "\
                     'id': 'root',                                   \n\
                     'disabled': false,                              \n\
                     'description': 'Super-Owner of system',         \n\
-                    'realm_domain': '==*',                          \n\
+                    'realm_owner': '==*',                           \n\
                     'realm_role': '==*',                            \n\
                     'realm_name': '==*',                            \n\
+                    'realm_env': '==*',                             \n\
                     'yuno_role': '==*',                             \n\
                     'yuno_name': '==*',                             \n\
                     'service': '==*'                                \n\
@@ -91,9 +92,10 @@ PRIVATE char variable_config[]= "\
                     'id': 'owner',                                  \n\
                     'disabled': false,                              \n\
                     'description': 'Owner of system',               \n\
-                    'realm_domain': '==$this.__realm_domain__',     \n\
+                    'realm_owner': '==$this.__realm_owner__',       \n\
                     'realm_role': '==$this.__realm_role__',         \n\
                     'realm_name': '==$this.__realm_name__',         \n\
+                    'realm_env': '==$this.__realm_env__',           \n\
                     'yuno_role': '==*',                             \n\
                     'yuno_name': '==*',                             \n\
                     'service': '==*'                                \n\
@@ -102,9 +104,10 @@ PRIVATE char variable_config[]= "\
                     'id': 'mulesol-sysop',          #^^ TODO TEST   \n\
                     'disabled': false,                              \n\
                     'description': 'Mulesol System Operator',       \n\
-                    'realm_domain': '==mulesol',                    \n\
+                    'realm_owner': '==mulesol',                     \n\
                     'realm_role': '==$this.__realm_role__',         \n\
                     'realm_name': '==$this.__realm_name__',         \n\
+                    'realm_env': '==$this.__realm_env__',           \n\
                     'yuno_role': '==controlcenter',                 \n\
                     'yuno_name': '==*',                             \n\
                     'service': '==controlcenter'                    \n\

@@ -80,37 +80,19 @@ PRIVATE char variable_config[]= "\
                     'id': 'root',                                   \n\
                     'disabled': false,                              \n\
                     'description': 'Super-Owner of system',         \n\
-                    'realm_owner': '==*',                           \n\
-                    'realm_role': '==*',                            \n\
-                    'realm_name': '==*',                            \n\
-                    'realm_env': '==*',                             \n\
-                    'yuno_role': '==*',                             \n\
-                    'yuno_name': '==*',                             \n\
-                    'service': '==*'                                \n\
+                    'realm_id': '==*'                               \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'owner',                                  \n\
                     'disabled': false,                              \n\
                     'description': 'Owner of system',               \n\
-                    'realm_owner': '==$this.__realm_owner__',       \n\
-                    'realm_role': '==$this.__realm_role__',         \n\
-                    'realm_name': '==$this.__realm_name__',         \n\
-                    'realm_env': '==$this.__realm_env__',           \n\
-                    'yuno_role': '==*',                             \n\
-                    'yuno_name': '==*',                             \n\
-                    'service': '==*'                                \n\
+                    'realm_id': '==$this`__realm_id__'              \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'mulesol-sysop',          #^^ TODO TEST   \n\
                     'disabled': false,                              \n\
                     'description': 'Mulesol System Operator',       \n\
-                    'realm_owner': '==mulesol',                     \n\
-                    'realm_role': '==$this.__realm_role__',         \n\
-                    'realm_name': '==$this.__realm_name__',         \n\
-                    'realm_env': '==$this.__realm_env__',           \n\
-                    'yuno_role': '==controlcenter',                 \n\
-                    'yuno_name': '==*',                             \n\
-                    'service': '==controlcenter'                    \n\
+                    'realm_id': '==$this`__realm_id__'              \n\
                 }                                                   \n\
             ],                                                      \n\
             'users': [                                              \n\
@@ -130,11 +112,27 @@ PRIVATE char variable_config[]= "\
             'authorizations': [                                     \n\
                 {                                                   \n\
                     'id': '__allow_all__',                          \n\
+                    'description': 'Full Access',                   \n\
                     'role_id': [                                    \n\
                         'roles^root^authorizations',                \n\
-                        'roles^owner^authorizations',               \n\
+                        'roles^owner^authorizations'                \n\
+                    ],                                              \n\
+                    'service': '==*',                               \n\
+                    'constraints': {                                \n\
+                        'authz': [],                                \n\
+                        'event': [],                                \n\
+                        'allow': true,                              \n\
+                        'topic_name': '==.*',                       \n\
+                        'topic_id': '==.*'                          \n\
+                    }                                               \n\
+                },                                                  \n\
+                {                                                   \n\
+                    'id': 'operate',                                \n\
+                    'description': 'System Operator',               \n\
+                    'role_id': [                                    \n\
                         'roles^mulesol-sysop^authorizations'        \n\
                     ],                                              \n\
+                    'service': '==controlcenter',                   \n\
                     'constraints': {                                \n\
                         'authz': [],                                \n\
                         'event': [],                                \n\

@@ -93,6 +93,12 @@ PRIVATE char variable_config[]= "\
                     'disabled': false,                              \n\
                     'description': 'Mulesol System Operator',       \n\
                     'realm_id': '==$this`__realm_id__'              \n\
+                },                                                  \n\
+                {                                                   \n\
+                    'id': 'manager',                                \n\
+                    'disabled': false,                              \n\
+                    'description': 'Manager of nodes',              \n\
+                    'realm_id': '==$this`__realm_id__'              \n\
                 }                                                   \n\
             ],                                                      \n\
             'users': [                                              \n\
@@ -129,6 +135,21 @@ PRIVATE char variable_config[]= "\
                 {                                                   \n\
                     'id': 'operate',                                \n\
                     'description': 'System Operator',               \n\
+                    'role_id': [                                    \n\
+                        'roles^mulesol-sysop^authorizations'        \n\
+                    ],                                              \n\
+                    'service': '==controlcenter',                   \n\
+                    'constraints': {                                \n\
+                        'authz': [],                                \n\
+                        'event': [],                                \n\
+                        'allow': true,                              \n\
+                        'topic_name': '==.*',                       \n\
+                        'topic_id': '==.*'                          \n\
+                    }                                               \n\
+                },                                                  \n\
+                {                                                   \n\
+                    'id': 'expand',                                 \n\
+                    'description': 'Can expand hooks',              \n\
                     'role_id': [                                    \n\
                         'roles^mulesol-sysop^authorizations'        \n\
                     ],                                              \n\

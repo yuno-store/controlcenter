@@ -17,7 +17,7 @@
 #define APP_NAME        ROLE_CONTROLCENTER
 #define APP_DOC         "Control Center of Yuneta Systems"
 
-#define APP_VERSION     "4.6.3"
+#define APP_VERSION     "4.6.4"
 #define APP_SUPPORT     "<niyamaka at yuneta.io>"
 #define APP_DATETIME    __DATE__ " " __TIME__
 
@@ -80,87 +80,39 @@ PRIVATE char variable_config[]= "\
                     'id': 'root',                                   \n\
                     'disabled': false,                              \n\
                     'description': 'Super-Owner of system',         \n\
-                    'realm_id': '==*'                               \n\
+                    'realm_id': '*',                                \n\
+                    'service': '*'                                  \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'owner',                                  \n\
                     'disabled': false,                              \n\
                     'description': 'Owner of system',               \n\
-                    'realm_id': '==$this`__realm_id__'              \n\
+                    'realm_id': '(^^__realm_id__^^)',               \n\
+                    'service': '*'                                  \n\
                 },                                                  \n\
                 {                                                   \n\
-                    'id': 'mulesol-sysop',          #^^ TODO TEST   \n\
+                    'id': 'manage-authz',                           \n\
                     'disabled': false,                              \n\
-                    'description': 'Mulesol System Operator',       \n\
-                    'realm_id': '==$this`__realm_id__'              \n\
-                },                                                  \n\
-                {                                                   \n\
-                    'id': 'manager',                                \n\
-                    'disabled': false,                              \n\
-                    'description': 'Manager of nodes',              \n\
-                    'realm_id': '==$this`__realm_id__'              \n\
+                    'description': 'Management of Authz',           \n\
+                    'realm_id': '(^^__realm_id__^^)',               \n\
+                    'service': 'authz'                              \n\
                 }                                                   \n\
             ],                                                      \n\
             'users': [                                              \n\
                 {                                                   \n\
                     'id': 'yuneta',                                 \n\
-                    'role_id': ['roles^root^users']                 \n\
+                    'role_ids': [                                   \n\
+                        'roles^root^users',                         \n\
+                        'roles^owner^users'                         \n\
+                    ]                                               \n\
                 },                                                  \n\
                 {                                                   \n\
-                    'id': 'ginsmar@mulesol.es',     #^^ TODO TEST   \n\
-                    'role_id': ['roles^owner^users']                \n\
-                },                                                  \n\
-                {                                                   \n\
-                    'id': 'desarrollo@mulesol.es',  #^^ TODO TEST   \n\
-                    'role_id': ['roles^mulesol-sysop^users']        \n\
-                }                                                   \n\
-            ],                                                      \n\
-            'authorizations': [                                     \n\
-                {                                                   \n\
-                    'id': '__allow_all__',                          \n\
-                    'description': 'Full Access',                   \n\
-                    'role_id': [                                    \n\
-                        'roles^root^authorizations',                \n\
-                        'roles^owner^authorizations'                \n\
-                    ],                                              \n\
-                    'service': '==*',                               \n\
-                    'constraints': {                                \n\
-                        'authz': [],                                \n\
-                        'event': [],                                \n\
-                        'allow': true,                              \n\
-                        'topic_name': '==.*',                       \n\
-                        'topic_id': '==.*'                          \n\
-                    }                                               \n\
-                },                                                  \n\
-                {                                                   \n\
-                    'id': 'operate',                                \n\
-                    'description': 'System Operator',               \n\
-                    'role_id': [                                    \n\
-                        'roles^mulesol-sysop^authorizations'        \n\
-                    ],                                              \n\
-                    'service': '==controlcenter',                   \n\
-                    'constraints': {                                \n\
-                        'authz': [],                                \n\
-                        'event': [],                                \n\
-                        'allow': true,                              \n\
-                        'topic_name': '==.*',                       \n\
-                        'topic_id': '==.*'                          \n\
-                    }                                               \n\
-                },                                                  \n\
-                {                                                   \n\
-                    'id': 'expand',                                 \n\
-                    'description': 'Can expand hooks',              \n\
-                    'role_id': [                                    \n\
-                        'roles^mulesol-sysop^authorizations'        \n\
-                    ],                                              \n\
-                    'service': '==controlcenter',                   \n\
-                    'constraints': {                                \n\
-                        'authz': [],                                \n\
-                        'event': [],                                \n\
-                        'allow': true,                              \n\
-                        'topic_name': '==.*',                       \n\
-                        'topic_id': '==.*'                          \n\
-                    }                                               \n\
+                    'id': 'ginsmar@mulesol.es',                     \n\
+                    'role_ids': [                                   \n\
+                        'roles^manage-authz^users',                 \n\
+                        'roles^root^users',                         \n\
+                        'roles^owner^users'                         \n\
+                    ]                                               \n\
                 }                                                   \n\
             ]                                                       \n\
         },                                                          \n\

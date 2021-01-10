@@ -96,6 +96,13 @@ PRIVATE char variable_config[]= "\
                     'description': 'Management of Authz',           \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
                     'service': 'treedb_authz'                       \n\
+                },                                                  \n\
+                {                                                   \n\
+                    'id': 'manage-controlcenter',                   \n\
+                    'disabled': false,                              \n\
+                    'description': 'Management of Controlcenter',   \n\
+                    'realm_id': '(^^__realm_id__^^)',               \n\
+                    'service': 'treedb_controlcenter'               \n\
                 }                                                   \n\
             ],                                                      \n\
             'users': [                                              \n\
@@ -109,8 +116,16 @@ PRIVATE char variable_config[]= "\
                 {                                                   \n\
                     'id': 'ginsmar@mulesol.es',                     \n\
                     'roles': [                                      \n\
+                        'roles^manage-controlcenter^users',         \n\
                         'roles^manage-authz^users',                 \n\
-                        'roles^root^users',                         \n\
+                        'roles^owner^users'                         \n\
+                    ]                                               \n\
+                },                                                  \n\
+                {                                                   \n\
+                    'id': 'cochoa@mulesol.es',                      \n\
+                    'roles': [                                      \n\
+                        'roles^manage-controlcenter^users',         \n\
+                        'roles^manage-authz^users',                 \n\
                         'roles^owner^users'                         \n\
                     ]                                               \n\
                 }                                                   \n\
@@ -189,7 +204,7 @@ int main(int argc, char *argv[])
 
 // Samples
 //     gobj_set_gclass_trace(GCLASS_IEVENT_CLI, "ievents2", TRUE);
-//     gobj_set_gclass_trace(GCLASS_IEVENT_SRV, "ievents2", TRUE);
+    gobj_set_gclass_trace(GCLASS_IEVENT_SRV, "ievents2", TRUE); // TODO TEST
 //     gobj_set_gclass_trace(GCLASS_CONTROLCENTER, "messages", TRUE);
 
 //     gobj_set_gobj_trace(0, "create_delete", TRUE, 0);

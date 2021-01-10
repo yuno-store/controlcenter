@@ -102,6 +102,7 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 10,                                \n\
                     'type': 'string',                               \n\
                     'flag': [                                       \n\
+                        'writable',                                 \n\
                         'persistent',                               \n\
                         'required'                                  \n\
                     ]                                               \n\
@@ -163,6 +164,7 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 10,                                \n\
                     'type': 'blob',                                 \n\
                     'flag': [                                       \n\
+                        'writable',                                 \n\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
@@ -211,16 +213,6 @@ static char treedb_schema_controlcenter[]= "\
                 },                                                  \n\
                 'url': {                                            \n\
                     'header': 'Url',                                \n\
-                    'type': 'string',                               \n\
-                    'fillspace': 10,                                \n\
-                    'flag': [                                       \n\
-                        'writable',                                 \n\
-                        'persistent',                               \n\
-                        'required'                                  \n\
-                    ]                                               \n\
-                },                                                  \n\
-                'realm': {                                          \n\
-                    'header': 'Realm',                              \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\

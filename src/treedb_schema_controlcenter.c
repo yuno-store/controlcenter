@@ -58,9 +58,9 @@
 
 */
 
-static char schema_gest_controlcenter[]= "\
+static char treedb_schema_controlcenter[]= "\
 {                                                                   \n\
-    'id': 'controlcenter',                                          \n\
+    'id': 'treedb_controlcenter',                                   \n\
     'schema_version': '1',                                          \n\
     'topics': [                                                     \n\
         {                                                           \n\

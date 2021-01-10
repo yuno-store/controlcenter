@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "c_controlcenter.h"
 
-#include "schema_gest_controlcenter.c"
+#include "treedb_schema_controlcenter.c"
 
 /***************************************************************************
  *              Constants
@@ -51,8 +51,6 @@ SDATA_END()
  *---------------------------------------------*/
 PRIVATE sdata_desc_t tattr_desc[] = {
 /*-ATTR-type------------name----------------flag----------------default-----description---------- */
-SDATA (ASN_OCTET_STR,   "company",          SDF_RD,             "default",  "Company"),
-
 SDATA (ASN_COUNTER64,   "txMsgs",           SDF_RD|SDF_PSTATS,  0,          "Messages transmitted"),
 SDATA (ASN_COUNTER64,   "rxMsgs",           SDF_RD|SDF_RSTATS,  0,          "Messages receiveds"),
 
@@ -115,14 +113,14 @@ PRIVATE void mt_create(hgobj gobj)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
-    helper_quote2doublequote(schema_gest_controlcenter);
+    helper_quote2doublequote(treedb_schema_controlcenter);
 
     /*
      *  Chequea schema fichador, exit si falla.
      */
-    json_t *jn_schema_gest_controlcenter;
-    jn_schema_gest_controlcenter = legalstring2json(schema_gest_controlcenter, TRUE);
-    if(!jn_schema_gest_controlcenter) {
+    json_t *jn_treedb_schema_controlcenter;
+    jn_treedb_schema_controlcenter = legalstring2json(treedb_schema_controlcenter, TRUE);
+    if(!jn_treedb_schema_controlcenter) {
         exit(-1);
     }
 
@@ -133,22 +131,17 @@ PRIVATE void mt_create(hgobj gobj)
     /*---------------------------*
      *  Create Timeranger
      *---------------------------*/
-    const char *company = gobj_read_str_attr(gobj, "company");
-    if(empty_string(company)) {
-        log_critical(LOG_OPT_EXIT_ZERO,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "Attribute 'company' is REQUIRED!",
-            NULL
-        );
-    }
     char path[PATH_MAX];
-    snprintf(path, sizeof(path),
-        "/yuneta/store/controlcenter/%s/%s",
-        company,
-        gobj_yuno_role_plus_name()
+    yuneta_realm_store_dir(
+        path,
+        sizeof(path),
+        "controlcenter",
+        gobj_yuno_realm_owner(),
+        gobj_yuno_realm_id(),
+        gobj_yuno_role_plus_name(),
+        TRUE
     );
+
     json_t *kw_tranger = json_pack("{s:s, s:s, s:b, s:i}",
         "path", path,
         "filename_mask", "%Y",
@@ -156,7 +149,7 @@ PRIVATE void mt_create(hgobj gobj)
         "on_critical_error", (int)(LOG_OPT_EXIT_ZERO)
     );
     priv->gobj_tranger = gobj_create_service(
-        "tranger",
+        "tranger_controlcenter",
         GCLASS_TRANGER,
         kw_tranger,
         gobj
@@ -166,14 +159,14 @@ PRIVATE void mt_create(hgobj gobj)
      *  Create Treedb
      *----------------------*/
     const char *treedb_name = kw_get_str(
-        jn_schema_gest_controlcenter,
+        jn_treedb_schema_controlcenter,
         "id",
-        "gest_controlcenter",
+        "treedb_controlcenter",
         KW_REQUIRED
     );
     json_t *kw_resource = json_pack("{s:s, s:o, s:i}",
         "treedb_name", treedb_name,
-        "treedb_schema", jn_schema_gest_controlcenter,
+        "treedb_schema", jn_treedb_schema_controlcenter,
         "exit_on_error", LOG_OPT_EXIT_ZERO
     );
 

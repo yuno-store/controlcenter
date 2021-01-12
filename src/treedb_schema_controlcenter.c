@@ -21,6 +21,7 @@
             │             system_id (↖) │ ──┘ 1
             │                           │
             │* description              │
+            │  disabled                 │
             │                           │
             │               services {} │ ◀─────────┐N
             │                           │           │
@@ -37,6 +38,7 @@
             │               systems [↖] │ ──┘n      │
             │                           │           │
             │  properties               │           │
+            │  disabled                 │
             │  _sessions                │           │
             └───────────────────────────┘           │
                                                     │
@@ -48,6 +50,7 @@
             │               systems [↖] │ ──────────┘n
             │                           │
             │* description              │
+            │  disabled                 │
             │* url                      │
             │* realm                    │
             │* service                  │
@@ -105,6 +108,15 @@ static char treedb_schema_controlcenter[]= "\
                         'writable',                                 \n\
                         'persistent',                               \n\
                         'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'disabled': {                                       \n\
+                    'header': 'disabled',                           \n\
+                    'fillspace': 8,                                 \n\
+                    'type': 'boolean',                              \n\
+                    'flag': [                                       \n\
+                        'inherit',                                  \n\
+                        'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
                 'services': {                                       \n\
@@ -168,6 +180,15 @@ static char treedb_schema_controlcenter[]= "\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
+                'disabled': {                                       \n\
+                    'header': 'disabled',                           \n\
+                    'fillspace': 8,                                 \n\
+                    'type': 'boolean',                              \n\
+                    'flag': [                                       \n\
+                        'inherit',                                  \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
                 '_sessions': {                                      \n\
                     'header': 'Sessions',                           \n\
                     'fillspace': 10,                                \n\
@@ -209,6 +230,15 @@ static char treedb_schema_controlcenter[]= "\
                         'writable',                                 \n\
                         'persistent',                               \n\
                         'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'disabled': {                                       \n\
+                    'header': 'disabled',                           \n\
+                    'fillspace': 8,                                 \n\
+                    'type': 'boolean',                              \n\
+                    'flag': [                                       \n\
+                        'inherit',                                  \n\
+                        'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
                 'url': {                                            \n\

@@ -20,10 +20,10 @@
             │                           │   │
             │             system_id (↖) │ ──┘ 1
             │                           │
-            │* description              │
+            │  description              │
             │  disabled                 │
             │                           │
-            │               services {} │ ◀─────────┐N
+            │                  nodes {} │ ◀─────────┐N
             │                           │           │
             │               managers {} │ ◀─┐N      │
             │                           │   │       │
@@ -38,8 +38,25 @@
             │               systems [↖] │ ──┘n      │
             │                           │           │
             │  properties               │           │
-            │  disabled                 │
+            │  disabled                 │           │
             │  _sessions                │           │
+            │  _geometry                │           │
+            └───────────────────────────┘           │
+                                                    │
+                                                    │
+                        nodes                       │
+            ┌───────────────────────────┐           │
+            │* id                       │           │
+            │                           │           │
+            │               systems [↖] │ ──────────┘n
+            │                           │
+            │  description              │
+            │  disabled                 │
+            │* ip                       │
+            │                           │
+            │               services {} │ ◀─────────┐N
+            │                           │           │
+            │  _geometry                │           │
             └───────────────────────────┘           │
                                                     │
                                                     │
@@ -47,13 +64,15 @@
             ┌───────────────────────────┐           │
             │* id                       │           │
             │                           │           │
-            │               systems [↖] │ ──────────┘n
+            │               nodes [↖]   │ ──────────┘n
             │                           │
-            │* description              │
+            │  description              │
             │  disabled                 │
             │* url                      │
-            │* realm                    │
-            │* service                  │
+            │* dst_role                 │
+            │* dst_service              │
+            │* visor                    │
+            │                           │
             │  _geometry                │
             └───────────────────────────┘
 
@@ -106,8 +125,7 @@ static char treedb_schema_controlcenter[]= "\
                     'type': 'string',                               \n\
                     'flag': [                                       \n\
                         'writable',                                 \n\
-                        'persistent',                               \n\
-                        'required'                                  \n\
+                        'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
                 'disabled': {                                       \n\
@@ -119,18 +137,18 @@ static char treedb_schema_controlcenter[]= "\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
-                'services': {                                       \n\
-                    'header': 'Services',                           \n\
-                    'type': 'array',                                \n\
+                'nodes': {                                          \n\
+                    'header': 'Nodes',                              \n\
+                    'type': 'object',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': ['hook'],                               \n\
                     'hook': {                                       \n\
-                        'services': 'systems'                       \n\
+                        'nodes': 'systems'                          \n\
                     }                                               \n\
                 },                                                  \n\
                 'managers': {                                       \n\
                     'header': 'Managers',                           \n\
-                    'type': 'array',                                \n\
+                    'type': 'object',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': ['hook'],                               \n\
                     'hook': {                                       \n\
@@ -208,13 +226,13 @@ static char treedb_schema_controlcenter[]= "\
         },                                                          \n\
                                                                     \n\
         {                                                           \n\
-            'topic_name': 'services',                               \n\
+            'topic_name': 'nodes',                                  \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
             'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
-                    'header': 'Service',                            \n\
+                    'header': 'Node',                               \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\
@@ -236,8 +254,78 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\
                         'writable',                                 \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'disabled': {                                       \n\
+                    'header': 'disabled',                           \n\
+                    'fillspace': 8,                                 \n\
+                    'type': 'boolean',                              \n\
+                    'flag': [                                       \n\
+                        'inherit',                                  \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'ip': {                                             \n\
+                    'header': 'Ip',                                 \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
                         'persistent',                               \n\
                         'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'services': {                                       \n\
+                    'header': 'Services',                           \n\
+                    'type': 'object',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': ['hook'],                               \n\
+                    'hook': {                                       \n\
+                        'services': 'nodes'                         \n\
+                    }                                               \n\
+                },                                                  \n\
+                '_geometry': {                                      \n\
+                    'header': 'Geometry',                           \n\
+                    'type': 'blob',                                 \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                }                                                   \n\
+            }                                                       \n\
+        },                                                          \n\
+                                                                    \n\
+        {                                                           \n\
+            'topic_name': 'services',                               \n\
+            'pkey': 'id',                                           \n\
+            'system_flag': 'sf_string_key',                         \n\
+            'topic_version': '1',                                   \n\
+            'cols': {                                               \n\
+                'id': {                                             \n\
+                    'header': 'Service',                            \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'nodes': {                                          \n\
+                    'header': 'Nodes',                              \n\
+                    'type': 'array',                                \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'fkey'                                      \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'description': {                                    \n\
+                    'header': 'Description',                        \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
                 'disabled': {                                       \n\
@@ -259,8 +347,28 @@ static char treedb_schema_controlcenter[]= "\
                         'required'                                  \n\
                     ]                                               \n\
                 },                                                  \n\
-                'service': {                                        \n\
+                'dst_role': {                                       \n\
+                    'header': 'Role',                               \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'dst_service': {                                    \n\
                     'header': 'Service',                            \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'visor': {                                          \n\
+                    'header': 'Visor',                              \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\

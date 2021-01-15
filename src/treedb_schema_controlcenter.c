@@ -195,6 +195,14 @@ static char treedb_schema_controlcenter[]= "\
                     'type': 'dict',                                 \n\
                     'flag': [                                       \n\
                     ]                                               \n\
+                },                                                  \n\
+                '_geometry': {                                      \n\
+                    'header': 'Geometry',                           \n\
+                    'type': 'blob',                                 \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
                 }                                                   \n\
             }                                                       \n\
         },                                                          \n\
@@ -266,8 +274,7 @@ static char treedb_schema_controlcenter[]= "\
                     'type': 'blob',                                 \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\
-                        'persistent',                               \n\
-                        'required'                                  \n\
+                        'persistent'                                \n\
                     ]                                               \n\
                 }                                                   \n\
             }                                                       \n\

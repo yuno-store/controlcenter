@@ -348,7 +348,7 @@ static char treedb_schema_controlcenter[]= "\
                     ]                                               \n\
                 },                                                  \n\
                 'dst_role': {                                       \n\
-                    'header': 'Role',                               \n\
+                    'header': 'Yuno Role',                          \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\
@@ -358,13 +358,22 @@ static char treedb_schema_controlcenter[]= "\
                     ]                                               \n\
                 },                                                  \n\
                 'dst_service': {                                    \n\
-                    'header': 'Service',                            \n\
+                    'header': 'Yuno Service',                       \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\
                         'writable',                                 \n\
                         'persistent',                               \n\
                         'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'dst_yuno': {                                       \n\
+                    'header': 'Yuno Name',                          \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
                 'visor': {                                          \n\

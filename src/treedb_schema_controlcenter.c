@@ -376,8 +376,8 @@ static char treedb_schema_controlcenter[]= "\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
-                'visor': {                                          \n\
-                    'header': 'Visor',                              \n\
+                'viewer_engine': {                                  \n\
+                    'header': 'Viewer Engine',                      \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\

@@ -39,7 +39,7 @@
             │                           │           │
             │  properties               │           │
             │  disabled                 │           │
-            │  _sessions                │           │
+            │  __sessions               │           │
             │  _geometry                │           │
             └───────────────────────────┘           │
                                                     │
@@ -83,7 +83,7 @@
 static char treedb_schema_controlcenter[]= "\
 {                                                                   \n\
     'id': 'treedb_controlcenter',                                   \n\
-    'schema_version': '1',                                          \n\
+    'schema_version': '2',                                          \n\
     'topics': [                                                     \n\
         {                                                           \n\
             'topic_name': 'systems',                                \n\
@@ -170,7 +170,7 @@ static char treedb_schema_controlcenter[]= "\
             'topic_name': 'managers',                               \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '2',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Manager',                            \n\
@@ -207,7 +207,7 @@ static char treedb_schema_controlcenter[]= "\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
-                '_sessions': {                                      \n\
+                '__sessions': {                                     \n\
                     'header': 'Sessions',                           \n\
                     'fillspace': 10,                                \n\
                     'type': 'dict',                                 \n\

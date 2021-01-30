@@ -21,7 +21,7 @@
             │             system_id (↖) │ ──┘ 1
             │                           │
             │  description              │
-            │  disabled                 │
+            │= disabled                 │
             │                           │
             │                  nodes {} │ ◀─────────┐N
             │                           │           │
@@ -51,7 +51,7 @@
             │               systems [↖] │ ──────────┘n
             │                           │
             │  description              │
-            │  disabled                 │
+            │= disabled                 │
             │* ip                       │
             │                           │
             │               services {} │ ◀─────────┐N
@@ -67,7 +67,7 @@
             │               nodes [↖]   │ ──────────┘n
             │                           │
             │  description              │
-            │  disabled                 │
+            │= disabled                 │
             │* url                      │
             │* dst_role                 │
             │* dst_service              │
@@ -83,13 +83,13 @@
 static char treedb_schema_controlcenter[]= "\
 {                                                                   \n\
     'id': 'treedb_controlcenter',                                   \n\
-    'schema_version': '2',                                          \n\
+    'schema_version': '3',                                          \n\
     'topics': [                                                     \n\
         {                                                           \n\
             'topic_name': 'systems',                                \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '2',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'System',                             \n\
@@ -133,6 +133,7 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 8,                                 \n\
                     'type': 'boolean',                              \n\
                     'flag': [                                       \n\
+                        'writable',                                 \n\
                         'inherit',                                  \n\
                         'persistent'                                \n\
                     ]                                               \n\
@@ -170,7 +171,7 @@ static char treedb_schema_controlcenter[]= "\
             'topic_name': 'managers',                               \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '2',                                   \n\
+            'topic_version': '3',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Manager',                            \n\
@@ -203,6 +204,7 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 8,                                 \n\
                     'type': 'boolean',                              \n\
                     'flag': [                                       \n\
+                        'writable',                                 \n\
                         'inherit',                                  \n\
                         'persistent'                                \n\
                     ]                                               \n\
@@ -229,7 +231,7 @@ static char treedb_schema_controlcenter[]= "\
             'topic_name': 'nodes',                                  \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '2',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Node',                               \n\
@@ -262,6 +264,7 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 8,                                 \n\
                     'type': 'boolean',                              \n\
                     'flag': [                                       \n\
+                        'writable',                                 \n\
                         'inherit',                                  \n\
                         'persistent'                                \n\
                     ]                                               \n\
@@ -300,7 +303,7 @@ static char treedb_schema_controlcenter[]= "\
             'topic_name': 'services',                               \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '2',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Service',                            \n\
@@ -333,6 +336,7 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 8,                                 \n\
                     'type': 'boolean',                              \n\
                     'flag': [                                       \n\
+                        'writable',                                 \n\
                         'inherit',                                  \n\
                         'persistent'                                \n\
                     ]                                               \n\

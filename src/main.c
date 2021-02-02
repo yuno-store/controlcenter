@@ -91,11 +91,27 @@ PRIVATE char variable_config[]= "\
                     'service': '*'                                  \n\
                 },                                                  \n\
                 {                                                   \n\
-                    'id': 'manage-authz',                           \n\
+                    'id': 'manage-authzs',                          \n\
                     'disabled': false,                              \n\
                     'description': 'Management of Authz',           \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
-                    'service': 'treedb_authz'                       \n\
+                    'service': 'treedb_authzs'                      \n\
+                },                                                  \n\
+                {                                                   \n\
+                    'id': 'write-authzs',                           \n\
+                    'disabled': false,                              \n\
+                    'description': 'Can write authz topics',        \n\
+                    'realm_id': '(^^__realm_id__^^)',               \n\
+                    'parent_role_id': 'roles^manage-authzs^roles',  \n\
+                    'service': 'treedb_authzs'                      \n\
+                },                                                  \n\
+                {                                                   \n\
+                    'id': 'read-authzs',                            \n\
+                    'disabled': false,                              \n\
+                    'description': 'Can read authz topics',         \n\
+                    'realm_id': '(^^__realm_id__^^)',               \n\
+                    'parent_role_id': 'roles^manage-authzs^roles',  \n\
+                    'service': 'treedb_authzs'                      \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'manage-controlcenter',                   \n\
@@ -117,7 +133,7 @@ PRIVATE char variable_config[]= "\
                     'id': 'ginsmar@mulesol.es',                     \n\
                     'roles': [                                      \n\
                         'roles^manage-controlcenter^users',         \n\
-                        'roles^manage-authz^users',                 \n\
+                        'roles^manage-authzs^users',                \n\
                         'roles^owner^users'                         \n\
                     ]                                               \n\
                 },                                                  \n\
@@ -125,7 +141,7 @@ PRIVATE char variable_config[]= "\
                     'id': 'cochoa@mulesol.es',                      \n\
                     'roles': [                                      \n\
                         'roles^manage-controlcenter^users',         \n\
-                        'roles^manage-authz^users',                 \n\
+                        'roles^manage-authzs^users',                \n\
                         'roles^owner^users'                         \n\
                     ]                                               \n\
                 }                                                   \n\

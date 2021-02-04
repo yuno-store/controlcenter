@@ -81,6 +81,7 @@ PRIVATE char variable_config[]= "\
                     'disabled': false,                              \n\
                     'description': 'Super-Owner of system',         \n\
                     'realm_id': '*',                                \n\
+                    'parent_role_id': '',                           \n\
                     'service': '*'                                  \n\
                 },                                                  \n\
                 {                                                   \n\
@@ -88,6 +89,7 @@ PRIVATE char variable_config[]= "\
                     'disabled': false,                              \n\
                     'description': 'Owner of system',               \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
+                    'parent_role_id': '',                           \n\
                     'service': '*'                                  \n\
                 },                                                  \n\
                 {                                                   \n\
@@ -95,6 +97,7 @@ PRIVATE char variable_config[]= "\
                     'disabled': false,                              \n\
                     'description': 'Management of Authz',           \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
+                    'parent_role_id': '',                           \n\
                     'service': 'treedb_authzs'                      \n\
                 },                                                  \n\
                 {                                                   \n\
@@ -118,6 +121,7 @@ PRIVATE char variable_config[]= "\
                     'disabled': false,                              \n\
                     'description': 'Management of Controlcenter',   \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
+                    'parent_role_id': '',                           \n\
                     'service': 'treedb_controlcenter'               \n\
                 }                                                   \n\
             ],                                                      \n\

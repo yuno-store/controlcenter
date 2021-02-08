@@ -82,7 +82,8 @@ PRIVATE char variable_config[]= "\
                     'description': 'Super-Owner of system',         \n\
                     'realm_id': '*',                                \n\
                     'parent_role_id': '',                           \n\
-                    'service': '*'                                  \n\
+                    'service': '*',                                 \n\
+                    'permission': '*'                               \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'owner',                                  \n\
@@ -90,7 +91,8 @@ PRIVATE char variable_config[]= "\
                     'description': 'Owner of system',               \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
                     'parent_role_id': '',                           \n\
-                    'service': '*'                                  \n\
+                    'service': '*',                                 \n\
+                    'permission': '*'                               \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'manage-authzs',                          \n\
@@ -98,7 +100,8 @@ PRIVATE char variable_config[]= "\
                     'description': 'Management of Authz',           \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
                     'parent_role_id': '',                           \n\
-                    'service': 'treedb_authzs'                      \n\
+                    'service': 'treedb_authzs',                     \n\
+                    'permission': '*'                               \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'write-authzs',                           \n\
@@ -106,7 +109,8 @@ PRIVATE char variable_config[]= "\
                     'description': 'Can write authz topics',        \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
                     'parent_role_id': 'roles^manage-authzs^roles',  \n\
-                    'service': 'treedb_authzs'                      \n\
+                    'service': 'treedb_authzs',                     \n\
+                    'permission': 'write'                           \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'read-authzs',                            \n\
@@ -114,7 +118,8 @@ PRIVATE char variable_config[]= "\
                     'description': 'Can read authz topics',         \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
                     'parent_role_id': 'roles^manage-authzs^roles',  \n\
-                    'service': 'treedb_authzs'                      \n\
+                    'service': 'treedb_authzs',                     \n\
+                    'permission': 'read'                            \n\
                 },                                                  \n\
                 {                                                   \n\
                     'id': 'manage-controlcenter',                   \n\
@@ -122,7 +127,8 @@ PRIVATE char variable_config[]= "\
                     'description': 'Management of Controlcenter',   \n\
                     'realm_id': '(^^__realm_id__^^)',               \n\
                     'parent_role_id': '',                           \n\
-                    'service': 'treedb_controlcenter'               \n\
+                    'service': 'treedb_controlcenter',              \n\
+                    'permission': '*'                               \n\
                 }                                                   \n\
             ],                                                      \n\
             'users': [                                              \n\

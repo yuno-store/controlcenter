@@ -85,7 +85,7 @@ typedef struct _PRIVATE_DATA {
     int32_t timeout;
 
     hgobj gobj_top_side;
-    hgobj treedb_gest;
+    hgobj treedb_controlcenter;
 
     hgobj gobj_tranger;
     json_t *tranger;
@@ -170,12 +170,13 @@ PRIVATE void mt_create(hgobj gobj)
         "exit_on_error", LOG_OPT_EXIT_ZERO
     );
 
-    priv->treedb_gest = gobj_create_service(
+    priv->treedb_controlcenter = gobj_create_service(
         treedb_name,
         GCLASS_NODE,
         kw_resource,
         gobj
     );
+    gobj_set_bottom_gobj(priv->treedb_controlcenter, priv->gobj_tranger);
 
     /*
      *  Do copy of heavy used parameters, for quick access.
@@ -238,10 +239,12 @@ PRIVATE int mt_play(hgobj gobj)
     /*
      *  Start tranger/treedb
      */
-    gobj_start(priv->gobj_tranger);
-    priv->tranger = gobj_read_pointer_attr(priv->gobj_tranger, "tranger");
-    gobj_write_pointer_attr(priv->treedb_gest, "tranger", priv->tranger);
-    gobj_start(priv->treedb_gest);
+    gobj_start(priv->treedb_controlcenter);
+
+    /*
+     *  HACK pipe inheritance
+     */
+    priv->tranger = gobj_read_pointer_attr(gobj, "tranger");
 
     /*
      *  Start __top_side__
@@ -269,8 +272,8 @@ PRIVATE int mt_pause(hgobj gobj)
     /*
      *  Stop treeb/tranger
      */
-    gobj_stop(priv->treedb_gest);
-    gobj_stop(priv->gobj_tranger);
+    gobj_stop(priv->treedb_controlcenter);
+
     priv->tranger = 0;
 
     clear_timeout(priv->timer);

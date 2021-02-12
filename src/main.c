@@ -17,7 +17,7 @@
 #define APP_NAME        ROLE_CONTROLCENTER
 #define APP_DOC         "Control Center of Yuneta Systems"
 
-#define APP_VERSION     "4.9.4"
+#define APP_VERSION     "4.9.5"
 #define APP_SUPPORT     "<niyamaka at yuneta.io>"
 #define APP_DATETIME    __DATE__ " " __TIME__
 
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
 
 // Samples
 //     gobj_set_gclass_trace(GCLASS_IEVENT_CLI, "ievents2", TRUE);
-//     gobj_set_gclass_trace(GCLASS_IEVENT_SRV, "ievents2", TRUE); // TODO TEST
+//     gobj_set_gclass_trace(GCLASS_IEVENT_SRV, "ievents2", TRUE);
 //     gobj_set_gclass_trace(GCLASS_CONTROLCENTER, "messages", TRUE);
 
 //     gobj_set_gobj_trace(0, "create_delete", TRUE, 0);

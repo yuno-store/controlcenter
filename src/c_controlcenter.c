@@ -176,7 +176,12 @@ PRIVATE void mt_create(hgobj gobj)
         kw_resource,
         gobj
     );
+
+    /*
+     *  HACK pipe inheritance
+     */
     gobj_set_bottom_gobj(priv->treedb_controlcenter, priv->gobj_tranger);
+    gobj_set_bottom_gobj(gobj, priv->treedb_controlcenter);
 
     /*
      *  Do copy of heavy used parameters, for quick access.
@@ -239,7 +244,9 @@ PRIVATE int mt_play(hgobj gobj)
     /*
      *  Start tranger/treedb
      */
-    gobj_start(priv->treedb_controlcenter);
+    if(!gobj_is_running(priv->treedb_controlcenter)) {
+        gobj_start(priv->treedb_controlcenter);
+    }
 
     /*
      *  HACK pipe inheritance

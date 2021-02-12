@@ -51,6 +51,8 @@
             │               systems [↖] │ ──────────┘n
             │                           │
             │  description              │
+            │  provider                 │
+            │  provider_url             │
             │= disabled                 │
             │* ip                       │
             │                           │
@@ -83,7 +85,7 @@
 static char treedb_schema_controlcenter[]= "\
 {                                                                   \n\
     'id': 'treedb_controlcenter',                                   \n\
-    'schema_version': '3',                                          \n\
+    'schema_version': '4',                                          \n\
     'topics': [                                                     \n\
         {                                                           \n\
             'topic_name': 'systems',                                \n\
@@ -231,7 +233,7 @@ static char treedb_schema_controlcenter[]= "\
             'topic_name': 'nodes',                                  \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '2',                                   \n\
+            'topic_version': '3',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Node',                               \n\
@@ -254,6 +256,34 @@ static char treedb_schema_controlcenter[]= "\
                     'header': 'Description',                        \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'provider': {                                       \n\
+                    'header': 'Provider',                           \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'provider_url': {                                   \n\
+                    'header': 'Provider Url',                       \n\
+                    'type': 'string',                               \n\
+                    'fillspace': 10,                                \n\
+                    'flag': [                                       \n\
+                        'url',                                      \n\
+                        'writable',                                 \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'properties': {                                     \n\
+                    'header': 'Properties',                         \n\
+                    'fillspace': 10,                                \n\
+                    'type': 'blob',                                 \n\
                     'flag': [                                       \n\
                         'writable',                                 \n\
                         'persistent'                                \n\

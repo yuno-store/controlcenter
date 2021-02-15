@@ -81,7 +81,6 @@
 
 
 TODO
-            │                           │
             │                  lists {} │ ◀─┐ N
             │                           │   │
             │                           │   │
@@ -96,7 +95,6 @@ TODO
             │               devices [↖] │ ──┘ n
             │                           │
             │  disabled                 │
-            │  topic_name               │
             │  key      []              │
             │  notkey   []              │
             │  from_tm                  │
@@ -115,7 +113,7 @@ TODO
             │  user_flag_mask_set       │
             │  user_flag_mask_notset    │
             │                           │
-            │          viewer_engine () │ ◀─────────┐ 1
+            │          viewer_engine {} │ ◀─────────┐ N (1) TODO
             │                           │           │
             │  _geometry                │           │
             └───────────────────────────┘           │
@@ -130,6 +128,7 @@ TODO
             │                           │
             │  _geometry                │
             └───────────────────────────┘
+
 
 
 
@@ -487,28 +486,7 @@ static char treedb_schema_controlcenter[]= "\
 }                                                                   \n\
 ";
 
-
 /*
-                'lists': {                                          \n\
-                    'header': 'Lists',                              \n\
-                    'type': 'object',                               \n\
-                    'fillspace': 10,                                \n\
-                    'flag': ['hook'],                               \n\
-                    'hook': {                                       \n\
-                        'lists': 'devices'                          \n\
-                    }                                               \n\
-                },                                                  \n\
-                '_geometry': {                                      \n\
-                    'header': 'Geometry',                           \n\
-                    'type': 'blob',                                 \n\
-                    'fillspace': 10,                                \n\
-                    'flag': [                                       \n\
-                        'persistent'                                \n\
-                    ]                                               \n\
-                }                                                   \n\
-            }                                                       \n\
-        },                                                          \n\
-                                                                    \n\
         {                                                           \n\
             'topic_name': 'lists',                                  \n\
             'pkey': 'id',                                           \n\
@@ -536,15 +514,6 @@ static char treedb_schema_controlcenter[]= "\
                     'header': 'disabled',                           \n\
                     'fillspace': 8,                                 \n\
                     'type': 'boolean',                              \n\
-                    'flag': [                                       \n\
-                        'writable',                                 \n\
-                        'persistent'                                \n\
-                    ]                                               \n\
-                },                                                  \n\
-                'topic_name': {                                     \n\
-                    'header': 'Topic',                              \n\
-                    'type': 'string',                               \n\
-                    'fillspace': 10,                                \n\
                     'flag': [                                       \n\
                         'writable',                                 \n\
                         'persistent'                                \n\
@@ -709,7 +678,7 @@ static char treedb_schema_controlcenter[]= "\
                 },                                                  \n\
                 'viewer_engine': {                                  \n\
                     'header': 'Viewer Engine',                      \n\
-                    'type': 'string',                               \n\
+                    'type': 'object',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\
                         'hook'                                      \n\
@@ -736,7 +705,7 @@ static char treedb_schema_controlcenter[]= "\
             'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
-                    'header': 'Viewer Engines',                     \n\
+                    'header': 'Viewer Engine',                      \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\

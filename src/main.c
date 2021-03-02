@@ -144,7 +144,7 @@ PRIVATE char variable_config[]= "\
                     'roles': [                                      \n\
                         'roles^manage-controlcenter^users',         \n\
                         'roles^manage-authzs^users',                \n\
-                        'roles^owner^users'                         \n\
+                        'roles^root^users'                          \n\
                     ]                                               \n\
                 },                                                  \n\
                 {                                                   \n\
@@ -152,7 +152,7 @@ PRIVATE char variable_config[]= "\
                     'roles': [                                      \n\
                         'roles^manage-controlcenter^users',         \n\
                         'roles^manage-authzs^users',                \n\
-                        'roles^owner^users'                         \n\
+                        'roles^root^users'                          \n\
                     ]                                               \n\
                 }                                                   \n\
             ]                                                       \n\

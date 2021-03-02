@@ -8,7 +8,7 @@
     [↖] n fkeys     (n parents)
     {↖} N fkeys     (N parents) ???
 
-
+    (2) pkey2 - secondary key
     * field required
     = field inherited
 
@@ -21,7 +21,6 @@
             │             system_id (↖) │ ──┘ 1
             │                           │
             │  description              │
-            │= disabled                 │
             │                           │
             │                  nodes {} │ ◀─────────┐N
             │                           │           │
@@ -38,7 +37,6 @@
             │               systems [↖] │ ──┘n      │
             │                           │           │
             │  properties               │           │
-            │  disabled                 │           │
             │  __sessions               │           │
             │  _geometry                │           │
             └───────────────────────────┘           │
@@ -53,7 +51,6 @@
             │  description              │
             │  provider                 │
             │  provider_url             │
-            │= disabled                 │
             │* ip                       │
             │                           │
             │               services {} │ ◀─────────┐N
@@ -64,12 +61,12 @@
                                                     │
                         services                    │
             ┌───────────────────────────┐           │
-            │* id                       │           │
+            │  id (rowid)               │           │
+            │  value (2)                │           │
             │                           │           │
             │               nodes [↖]   │ ──────────┘n
             │                           │
             │  description              │
-            │= disabled                 │
             │* url                      │
             │* dst_role                 │
             │* dst_service              │
@@ -137,13 +134,13 @@ TODO
 static char treedb_schema_controlcenter[]= "\
 {                                                                   \n\
     'id': 'treedb_controlcenter',                                   \n\
-    'schema_version': '4',                                          \n\
+    'schema_version': '1',                                          \n\
     'topics': [                                                     \n\
         {                                                           \n\
-            'topic_name': 'systems',                                \n\
+            'id': 'systems',                                        \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '2',                                   \n\
+            'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'System',                             \n\
@@ -182,16 +179,6 @@ static char treedb_schema_controlcenter[]= "\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
-                'disabled': {                                       \n\
-                    'header': 'disabled',                           \n\
-                    'fillspace': 8,                                 \n\
-                    'type': 'boolean',                              \n\
-                    'flag': [                                       \n\
-                        'writable',                                 \n\
-                        'inherit',                                  \n\
-                        'persistent'                                \n\
-                    ]                                               \n\
-                },                                                  \n\
                 'nodes': {                                          \n\
                     'header': 'Nodes',                              \n\
                     'type': 'object',                               \n\
@@ -222,10 +209,10 @@ static char treedb_schema_controlcenter[]= "\
         },                                                          \n\
                                                                     \n\
         {                                                           \n\
-            'topic_name': 'managers',                               \n\
+            'id': 'managers',                                       \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '3',                                   \n\
+            'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Manager',                            \n\
@@ -253,16 +240,6 @@ static char treedb_schema_controlcenter[]= "\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
-                'disabled': {                                       \n\
-                    'header': 'disabled',                           \n\
-                    'fillspace': 8,                                 \n\
-                    'type': 'boolean',                              \n\
-                    'flag': [                                       \n\
-                        'writable',                                 \n\
-                        'inherit',                                  \n\
-                        'persistent'                                \n\
-                    ]                                               \n\
-                },                                                  \n\
                 '__sessions': {                                     \n\
                     'header': 'Sessions',                           \n\
                     'fillspace': 10,                                \n\
@@ -282,10 +259,10 @@ static char treedb_schema_controlcenter[]= "\
         },                                                          \n\
                                                                     \n\
         {                                                           \n\
-            'topic_name': 'nodes',                                  \n\
+            'id': 'nodes',                                          \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '3',                                   \n\
+            'topic_version': '1',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Node',                               \n\
@@ -341,16 +318,6 @@ static char treedb_schema_controlcenter[]= "\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
-                'disabled': {                                       \n\
-                    'header': 'disabled',                           \n\
-                    'fillspace': 8,                                 \n\
-                    'type': 'boolean',                              \n\
-                    'flag': [                                       \n\
-                        'writable',                                 \n\
-                        'inherit',                                  \n\
-                        'persistent'                                \n\
-                    ]                                               \n\
-                },                                                  \n\
                 'ip': {                                             \n\
                     'header': 'Ip',                                 \n\
                     'type': 'string',                               \n\
@@ -382,18 +349,27 @@ static char treedb_schema_controlcenter[]= "\
         },                                                          \n\
                                                                     \n\
         {                                                           \n\
-            'topic_name': 'services',                               \n\
+            'id': 'services',                                       \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '2',                                   \n\
+            'topic_version': '1',                                   \n\
+            'pkey2s': 'value',                                      \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
+                    'header': 'Rowid',                              \n\
+                    'fillspace': 4,                                 \n\
+                    'type': 'string',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'rowid'                                     \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'value': {                                          \n\
                     'header': 'Service',                            \n\
                     'type': 'string',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\
-                        'persistent',                               \n\
-                        'required'                                  \n\
+                        'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
                 'nodes': {                                          \n\
@@ -410,16 +386,6 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 10,                                \n\
                     'flag': [                                       \n\
                         'writable',                                 \n\
-                        'persistent'                                \n\
-                    ]                                               \n\
-                },                                                  \n\
-                'disabled': {                                       \n\
-                    'header': 'disabled',                           \n\
-                    'fillspace': 8,                                 \n\
-                    'type': 'boolean',                              \n\
-                    'flag': [                                       \n\
-                        'writable',                                 \n\
-                        'inherit',                                  \n\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
@@ -488,7 +454,7 @@ static char treedb_schema_controlcenter[]= "\
 
 /*
         {                                                           \n\
-            'topic_name': 'lists',                                  \n\
+            'id': 'lists',                                  \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
             'topic_version': '1',                                   \n\
@@ -699,7 +665,7 @@ static char treedb_schema_controlcenter[]= "\
         },                                                          \n\
                                                                     \n\
         {                                                           \n\
-            'topic_name': 'viewer_engines',                         \n\
+            'id': 'viewer_engines',                         \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
             'topic_version': '1',                                   \n\

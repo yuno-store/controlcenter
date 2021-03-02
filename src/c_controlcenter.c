@@ -7,6 +7,8 @@
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
+#include <grp.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 #include "c_controlcenter.h"
@@ -51,6 +53,7 @@ SDATA_END()
  *---------------------------------------------*/
 PRIVATE sdata_desc_t tattr_desc[] = {
 /*-ATTR-type------------name----------------flag----------------default-----description---------- */
+SDATA (ASN_OCTET_STR,   "__username__",     SDF_RD,             "",              "Username"),
 SDATA (ASN_COUNTER64,   "txMsgs",           SDF_RD|SDF_PSTATS,  0,          "Messages transmitted"),
 SDATA (ASN_COUNTER64,   "rxMsgs",           SDF_RD|SDF_RSTATS,  0,          "Messages receiveds"),
 
@@ -85,10 +88,8 @@ typedef struct _PRIVATE_DATA {
     int32_t timeout;
 
     hgobj gobj_top_side;
-    hgobj treedb_controlcenter;
-
-    hgobj gobj_tranger;
-    json_t *tranger;
+    hgobj gobj_treedbs;
+    hgobj gobj_treedb_controlcenter;
 
     uint64_t *ptxMsgs;
     uint64_t *prxMsgs;
@@ -103,6 +104,11 @@ typedef struct _PRIVATE_DATA {
              *      Framework Methods
              ******************************/
 
+/*
+ TODO backup de mis datos
+    "path": "/yuneta/realms/mulesol/mulesol.yunetacontrol.dev/controlcenter^mulesol/temp",
+    "filename": "treedb_controlcenter-4-2021-02-24.trdb.json"
+*/
 
 
 
@@ -113,75 +119,70 @@ PRIVATE void mt_create(hgobj gobj)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
-    helper_quote2doublequote(treedb_schema_controlcenter);
-
-    /*
-     *  Chequea schema fichador, exit si falla.
-     */
-    json_t *jn_treedb_schema_controlcenter;
-    jn_treedb_schema_controlcenter = legalstring2json(treedb_schema_controlcenter, TRUE);
-    if(!jn_treedb_schema_controlcenter) {
-        exit(-1);
-    }
-
     priv->timer = gobj_create(gobj_name(gobj), GCLASS_TIMER, 0, gobj);
     priv->ptxMsgs = gobj_danger_attr_ptr(gobj, "txMsgs");
     priv->prxMsgs = gobj_danger_attr_ptr(gobj, "rxMsgs");
 
-    /*---------------------------*
-     *  Create Timeranger
-     *---------------------------*/
+    /*----------------------------------------*
+     *  Check AUTHZS
+     *----------------------------------------*/
+    BOOL is_yuneta = FALSE;
+    struct passwd *pw = getpwuid(getuid());
+    if(strcmp(pw->pw_name, "yuneta")==0) {
+        gobj_write_str_attr(gobj, "__username__", "yuneta");
+        is_yuneta = TRUE;
+    } else {
+        static gid_t groups[30]; // HACK to use outside
+        int ngroups = sizeof(groups)/sizeof(groups[0]);
+
+        getgrouplist(pw->pw_name, 0, groups, &ngroups);
+        for(int i=0; i<ngroups; i++) {
+            struct group *gr = getgrgid(groups[i]);
+            if(strcmp(gr->gr_name, "yuneta")==0) {
+                gobj_write_str_attr(gobj, "__username__", "yuneta");
+                is_yuneta = TRUE;
+                break;
+            }
+        }
+    }
+    if(!is_yuneta) {
+        trace_msg("User or group 'yuneta' is needed to run %s", gobj_yuno_role());
+        printf("User or group 'yuneta' is needed to run %s\n", gobj_yuno_role());
+        exit(0);
+    }
+
+    /*-------------------------------------------*
+     *          Create treedb System
+     *-------------------------------------------*/
     char path[PATH_MAX];
     yuneta_realm_store_dir(
         path,
         sizeof(path),
-        "controlcenter",
+        gobj_yuno_role(),
         gobj_yuno_realm_owner(),
         gobj_yuno_realm_id(),
-        "tranger",
+        "",  // gclass-treedb controls the directories
         TRUE
     );
-
-    json_t *kw_tranger = json_pack("{s:s, s:s, s:b, s:i}",
+    json_t *kw_treedbs = json_pack("{s:s, s:s, s:b, s:i, s:i, s:i}",
         "path", path,
-        "filename_mask", "%Y",
+        "filename_mask", "%Y",  // to management treedbs we don't need multifiles (per day)
         "master", 1,
-        "on_critical_error", (int)(LOG_OPT_EXIT_ZERO)
-    );
-    priv->gobj_tranger = gobj_create_service(
-        "tranger_controlcenter",
-        GCLASS_TRANGER,
-        kw_tranger,
-        gobj
-    );
-
-    /*----------------------*
-     *  Create Treedb
-     *----------------------*/
-    const char *treedb_name = kw_get_str(
-        jn_treedb_schema_controlcenter,
-        "id",
-        "treedb_controlcenter",
-        KW_REQUIRED
-    );
-    json_t *kw_resource = json_pack("{s:s, s:o, s:i}",
-        "treedb_name", treedb_name,
-        "treedb_schema", jn_treedb_schema_controlcenter,
+        "xpermission", 02770,
+        "rpermission", 0660,
         "exit_on_error", LOG_OPT_EXIT_ZERO
     );
-
-    priv->treedb_controlcenter = gobj_create_service(
-        treedb_name,
-        GCLASS_NODE,
-        kw_resource,
+    priv->gobj_treedbs = gobj_create_service(
+        "treedbs",
+        GCLASS_TREEDB,
+        kw_treedbs,
         gobj
     );
 
     /*
      *  HACK pipe inheritance
      */
-    gobj_set_bottom_gobj(priv->treedb_controlcenter, priv->gobj_tranger);
-    gobj_set_bottom_gobj(gobj, priv->treedb_controlcenter);
+    gobj_set_bottom_gobj(gobj, priv->gobj_treedbs);
 
     /*
      *  Do copy of heavy used parameters, for quick access.
@@ -215,6 +216,12 @@ PRIVATE int mt_start(hgobj gobj)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
+    /*
+     *  Start treedbs
+     */
+    gobj_subscribe_event(priv->gobj_treedbs, 0, 0, gobj);
+    gobj_start_tree(priv->gobj_treedbs);
+
     gobj_start(priv->timer);
     return 0;
 }
@@ -225,6 +232,14 @@ PRIVATE int mt_start(hgobj gobj)
 PRIVATE int mt_stop(hgobj gobj)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
+
+    /*
+     *  Stop treedbs
+     */
+    if(priv->gobj_treedbs) {
+        gobj_unsubscribe_event(priv->gobj_treedbs, 0, 0, gobj);
+        gobj_stop_tree(priv->gobj_treedbs);
+    }
 
     gobj_stop(priv->timer);
     return 0;
@@ -241,21 +256,54 @@ PRIVATE int mt_play(hgobj gobj)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
-    /*
-     *  Start tranger/treedb
-     */
-    if(!gobj_is_running(priv->treedb_controlcenter)) {
-        gobj_start(priv->treedb_controlcenter);
+    /*---------------------------------------*
+     *      Open treedb controlcenter
+     *---------------------------------------*/
+    helper_quote2doublequote(treedb_schema_controlcenter);
+    json_t *jn_treedb_schema_controlcenter;
+    jn_treedb_schema_controlcenter = legalstring2json(treedb_schema_controlcenter, TRUE);
+    if(!jn_treedb_schema_controlcenter) {
+        /*
+         *  Exit if schema fails
+         */
+        exit(-1);
     }
+    const char *treedb_name = kw_get_str(
+        jn_treedb_schema_controlcenter,
+        "id",
+        "treedb_controlcenter",
+        KW_REQUIRED
+    );
 
-    /*
-     *  HACK pipe inheritance
-     */
-    priv->tranger = gobj_read_pointer_attr(gobj, "tranger");
+    json_t *kw_treedb = json_pack("{s:s, s:i, s:s, s:o}",
+        "filename_mask", "%Y",
+        "exit_on_error", 0,
+        "treedb_name", treedb_name,
+        "treedb_schema", jn_treedb_schema_controlcenter
+    );
+    json_t *jn_resp = gobj_command(priv->gobj_treedbs,
+        "open-treedb",
+        kw_treedb,
+        gobj
+    );
+    int result = kw_get_int(jn_resp, "result", -1, KW_REQUIRED);
+    if(result < 0) {
+        const char *comment = kw_get_str(jn_resp, "comment", "", KW_REQUIRED);
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_APP_ERROR,
+            "msg",          "%s", comment,
+            NULL
+        );
+    }
+    json_decref(jn_resp);
 
-    /*
-     *  Start __top_side__
-     */
+    priv->gobj_treedb_controlcenter = gobj_find_service("treedb_controlcenter", TRUE);
+
+    /*---------------------------------------*
+     *      Start __top_side__
+     *---------------------------------------*/
     priv->gobj_top_side = gobj_find_service("__top_side__", TRUE);
     gobj_subscribe_event(priv->gobj_top_side, 0, 0, gobj);
     gobj_start_tree(priv->gobj_top_side);
@@ -270,18 +318,25 @@ PRIVATE int mt_pause(hgobj gobj)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
-    /*
-     *  Stop __top_side__
-     */
-    gobj_unsubscribe_event(priv->gobj_top_side, 0, 0, gobj);
-    EXEC_AND_RESET(gobj_stop_tree, priv->gobj_top_side);
+    /*---------------------------------------*
+     *      Stop __top_side__
+     *---------------------------------------*/
+    if(priv->gobj_top_side) {
+        gobj_unsubscribe_event(priv->gobj_top_side, 0, 0, gobj);
+        EXEC_AND_RESET(gobj_stop_tree, priv->gobj_top_side);
+    }
 
-    /*
-     *  Stop treeb/tranger
-     */
-    gobj_stop(priv->treedb_controlcenter);
-
-    priv->tranger = 0;
+    /*---------------------------------------*
+     *      Close treedb controlcenter
+     *---------------------------------------*/
+    json_decref(gobj_command(priv->gobj_treedbs,
+        "close-treedb",
+        json_pack("{s:s}",
+            "treedb_name", "treedb_controlcenter"
+        ),
+        gobj
+    ));
+    priv->gobj_treedb_controlcenter = 0;
 
     clear_timeout(priv->timer);
     return 0;

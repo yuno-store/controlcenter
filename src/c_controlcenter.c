@@ -268,6 +268,21 @@ PRIVATE int mt_play(hgobj gobj)
          */
         exit(-1);
     }
+
+    if(parse_schema(jn_treedb_schema_controlcenter)<0) {
+        /*
+         *  Exit if schema fails
+         */
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_APP_ERROR,
+            "msg",          "%s", "Parse schema fails",
+            NULL
+        );
+        exit(-1);
+    }
+
     const char *treedb_name = kw_get_str(
         jn_treedb_schema_controlcenter,
         "id",

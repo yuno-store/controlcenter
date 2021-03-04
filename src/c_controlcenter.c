@@ -152,7 +152,7 @@ PRIVATE void mt_create(hgobj gobj)
     }
 
     /*-------------------------------------------*
-     *          Create treedb System
+     *          Create Treedb System
      *-------------------------------------------*/
     char path[PATH_MAX];
     yuneta_realm_store_dir(

@@ -31,11 +31,24 @@
  *          Data: config, public data, private data
  ***************************************************************************/
 PRIVATE json_t *cmd_help(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
+PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
+PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 
 PRIVATE sdata_desc_t pm_help[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
 SDATAPM (ASN_OCTET_STR, "cmd",          0,              0,          "command about you want help."),
 SDATAPM (ASN_UNSIGNED,  "level",        0,              0,          "command search level in childs"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_list_agents[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_BOOLEAN,  "expand",        0,              0,          "Expand details"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_command_agent[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id"),
+SDATAPM (ASN_OCTET_STR, "cmd",          0,              0,          "command to agent"),
 SDATA_END()
 };
 
@@ -44,6 +57,8 @@ PRIVATE const char *a_help[] = {"h", "?", 0};
 PRIVATE sdata_desc_t command_table[] = {
 /*-CMD---type-----------name----------------alias---------------items-----------json_fn---------description---------- */
 SDATACM (ASN_SCHEMA,    "help",             a_help,             pm_help,        cmd_help,       "Command's help"),
+SDATACM (ASN_SCHEMA,    "list-agents",      0,                  pm_list_agents, cmd_list_agents, "List connected agents"),
+SDATACM (ASN_SCHEMA,    "command-agent",    0,                  pm_command_agent, cmd_command_agent, "Command to agent"),
 SDATA_END()
 };
 
@@ -88,6 +103,7 @@ typedef struct _PRIVATE_DATA {
     int32_t timeout;
 
     hgobj gobj_top_side;
+    hgobj gobj_input_side;
     hgobj gobj_treedbs;
     hgobj gobj_treedb_controlcenter;
 
@@ -323,6 +339,13 @@ PRIVATE int mt_play(hgobj gobj)
     gobj_subscribe_event(priv->gobj_top_side, 0, 0, gobj);
     gobj_start_tree(priv->gobj_top_side);
 
+    /*---------------------------------------*
+     *      Start __input_side__
+     *---------------------------------------*/
+    priv->gobj_input_side = gobj_find_service("__input_side__", TRUE);
+    gobj_subscribe_event(priv->gobj_input_side, 0, 0, gobj);
+    gobj_start_tree(priv->gobj_input_side);
+
     return 0;
 }
 
@@ -339,6 +362,14 @@ PRIVATE int mt_pause(hgobj gobj)
     if(priv->gobj_top_side) {
         gobj_unsubscribe_event(priv->gobj_top_side, 0, 0, gobj);
         EXEC_AND_RESET(gobj_stop_tree, priv->gobj_top_side);
+    }
+
+    /*---------------------------------------*
+     *      Input __input_side__
+     *---------------------------------------*/
+    if(priv->gobj_input_side) {
+        gobj_unsubscribe_event(priv->gobj_input_side, 0, 0, gobj);
+        EXEC_AND_RESET(gobj_stop_tree, priv->gobj_input_side);
     }
 
     /*---------------------------------------*
@@ -384,6 +415,100 @@ PRIVATE json_t *cmd_help(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
     );
 }
 
+/***************************************************************************
+ *
+ ***************************************************************************/
+PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
+{
+    PRIVATE_DATA *priv = gobj_priv_data(gobj);
+    BOOL expand = kw_get_bool(kw, "expand", 0, KW_WILD_NUMBER);
+
+    json_t *jn_data = json_array();
+
+    json_t *jn_filter = json_pack("{s:s, s:s}",
+        "__gclass_name__", GCLASS_IEVENT_SRV_NAME,
+        "__state__", "ST_SESSION"
+    );
+    dl_list_t *dl_childs = gobj_match_childs_tree(priv->gobj_input_side, 0, jn_filter);
+
+    hgobj child; rc_instance_t *i_hs;
+    i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
+    while(i_hs) {
+        json_t *jn_attrs = gobj_read_json_attr(child, "attrs");
+        if(expand) {
+            json_array_append(jn_data, jn_attrs);
+        } else {
+            json_array_append_new(jn_data, json_string(kw_get_str(jn_attrs, "id", "", 0)));
+        }
+        i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+    }
+
+    rc_free_iter(dl_childs, TRUE, 0);
+
+    return msg_iev_build_webix(gobj,
+        0,
+        0,
+        0,
+        jn_data,
+        kw  // owned
+    );
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
+{
+    PRIVATE_DATA *priv = gobj_priv_data(gobj);
+    const char *id = kw_get_str(kw, "agent_id", "", 0);
+    const char *cmd2agent = kw_get_str(kw, "cmd", "", 0);
+
+    if(empty_string(cmd2agent)) {
+        return msg_iev_build_webix(gobj,
+            -1,
+            json_string("What command?"),
+            0,
+            0,
+            kw  // owned
+        );
+    }
+
+    json_t *jn_data = json_array();
+
+    json_t *jn_filter = json_pack("{s:s, s:s}",
+        "__gclass_name__", GCLASS_IEVENT_SRV_NAME,
+        "__state__", "ST_SESSION"
+    );
+    dl_list_t *dl_childs = gobj_match_childs_tree(priv->gobj_input_side, 0, jn_filter);
+
+    hgobj child; rc_instance_t *i_hs;
+    i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
+    while(i_hs) {
+        json_t *jn_attrs = gobj_read_json_attr(child, "attrs");
+        if(!empty_string(id)) {
+            const char *id_ = kw_get_str(jn_attrs, "id", "", 0);
+            if(strcmp(id_, id)!=0) {
+                i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+                continue;
+            }
+
+        }
+        gobj_command(child, cmd2agent, 0, gobj);
+
+        i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+    }
+
+    rc_free_iter(dl_childs, TRUE, 0);
+
+    return msg_iev_build_webix(gobj,
+        0,
+        0,
+        0,
+        jn_data,
+        kw  // owned
+    );
+}
+
 
 
 
@@ -409,7 +534,7 @@ PRIVATE int ac_on_open(hgobj gobj, const char *event, json_t *kw, hgobj src)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
-    if(src != priv->gobj_top_side) {
+    if(src != priv->gobj_top_side && src != priv->gobj_input_side) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
@@ -427,6 +552,7 @@ PRIVATE int ac_on_open(hgobj gobj, const char *event, json_t *kw, hgobj src)
 /***************************************************************************
  *  Identity_card off from
  *      Web clients (__top_side__)
+ *      agent clients (__input_side__)
  ***************************************************************************/
 PRIVATE int ac_on_close(hgobj gobj, const char *event, json_t *kw, hgobj src)
 {
@@ -561,12 +687,12 @@ PRIVATE GCLASS _gclass = {
         0, //mt_create_node,
         0, //mt_update_node,
         0, //mt_delete_node,
-        0, //mt_link_nodes,
+        0, //mt_link_agents,
         0, //mt_future44,
-        0, //mt_unlink_nodes,
+        0, //mt_unlink_agents,
         0, //mt_topic_jtree,
         0, //mt_get_node,
-        0, //mt_list_nodes,
+        0, //mt_list_agents,
         0, //mt_shoot_snap,
         0, //mt_activate_snap,
         0, //mt_list_snaps,

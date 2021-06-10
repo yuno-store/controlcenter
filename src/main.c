@@ -50,7 +50,7 @@ PRIVATE char variable_config[]= "\
         'daemon_log_handlers': {                                    \n\
             'to_file': {                                            \n\
                 'handler_type': 'file',                             \n\
-                'filename_mask': 'controlcenter-MM-DD.log',         \n\
+                'filename_mask': 'controlcenter-W.log',         \n\
                 'handler_options': 255                              \n\
             },                                                      \n\
             'to_udp': {                                             \n\

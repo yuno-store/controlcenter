@@ -493,7 +493,17 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj
             }
 
         }
-        gobj_command(child, cmd2agent, 0, gobj);
+
+        json_t *kw_agent = json_object();
+
+        json_t *jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, TRUE);
+        msg_iev_push_stack(
+            kw_agent,
+            IEVENT_MESSAGE_AREA_ID,
+            json_incref(jn_ievent_id)
+        );
+
+        gobj_command(child, cmd2agent, kw_agent, gobj);
 
         i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
     }
@@ -561,6 +571,92 @@ PRIVATE int ac_on_close(hgobj gobj, const char *event, json_t *kw, hgobj src)
 }
 
 /***************************************************************************
+ *  HACK nodo intermedio
+ ***************************************************************************/
+PRIVATE int ac_stats_yuno_answer(hgobj gobj, const char *event, json_t *kw, hgobj src)
+{
+    json_t *jn_ievent_id = msg_iev_pop_stack(kw, IEVENT_MESSAGE_AREA_ID);
+
+    const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+
+    hgobj gobj_requester = gobj_child_by_name(
+        gobj_child_by_name(gobj, "__input_side__", 0),
+        dst_service,
+        0
+    );
+    if(!gobj_requester) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "child not found",
+            "child",        "%s", dst_service,
+            NULL
+        );
+        JSON_DECREF(jn_ievent_id);
+        KW_DECREF(kw);
+        return 0;
+    }
+    JSON_DECREF(jn_ievent_id);
+
+    KW_INCREF(kw);
+    json_t *kw_redirect = msg_iev_answer(gobj, kw, kw, 0);
+
+    return gobj_send_event(
+        gobj_requester,
+        event,
+        kw_redirect,
+        gobj
+    );
+}
+
+/***************************************************************************
+ *  HACK nodo intermedio
+ ***************************************************************************/
+PRIVATE int ac_command_yuno_answer(hgobj gobj, const char *event, json_t *kw, hgobj src)
+{
+    json_t *jn_ievent_id = msg_iev_pop_stack(kw, IEVENT_MESSAGE_AREA_ID);
+
+    const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+    if(strcmp(dst_service, gobj_name(gobj))==0) {
+        // Comando directo del agente
+        JSON_DECREF(jn_ievent_id);
+        KW_DECREF(kw);
+        return 0;
+    }
+
+    hgobj gobj_requester = gobj_child_by_name(
+        gobj_child_by_name(gobj, "__input_side__", 0),
+        dst_service,
+        0
+    );
+    if(!gobj_requester) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "child not found",
+            "child",        "%s", dst_service,
+            NULL
+        );
+        JSON_DECREF(jn_ievent_id);
+        KW_DECREF(kw);
+        return 0;
+    }
+    JSON_DECREF(jn_ievent_id);
+
+    KW_INCREF(kw);
+    json_t *kw_redirect = msg_iev_answer(gobj, kw, kw, 0);
+
+    return gobj_send_event(
+        gobj_requester,
+        event,
+        kw_redirect,
+        gobj
+    );
+}
+
+/***************************************************************************
  *
  ***************************************************************************/
 PRIVATE int ac_timeout(hgobj gobj, const char *event, json_t *kw, hgobj src)
@@ -593,6 +689,8 @@ PRIVATE const EVENT input_events[] = {
     // top input
     {"EV_ON_OPEN",              0,  0,  0},
     {"EV_ON_CLOSE",             0,  0,  0},
+    {"EV_MT_STATS_ANSWER",      EVF_PUBLIC_EVENT,  0,  0},
+    {"EV_MT_COMMAND_ANSWER",    EVF_PUBLIC_EVENT,  0,  0},
     // bottom input
     {"EV_TIMEOUT",              0,  0,  0},
     {"EV_STOPPED",              0,  0,  0},
@@ -610,8 +708,10 @@ PRIVATE const char *state_names[] = {
 PRIVATE EV_ACTION ST_IDLE[] = {
     {"EV_ON_OPEN",                  ac_on_open,                 0},
     {"EV_ON_CLOSE",                 ac_on_close,                0},
-    {"EV_TIMEOUT",                  ac_timeout,             0},
-    {"EV_STOPPED",                  0,                      0},
+    {"EV_MT_STATS_ANSWER",          ac_stats_yuno_answer,       0},
+    {"EV_MT_COMMAND_ANSWER",        ac_command_yuno_answer,     0},
+    {"EV_TIMEOUT",                  ac_timeout,                 0},
+    {"EV_STOPPED",                  0,                          0},
     {0,0,0}
 };
 

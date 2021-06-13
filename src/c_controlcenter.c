@@ -120,11 +120,6 @@ typedef struct _PRIVATE_DATA {
              *      Framework Methods
              ******************************/
 
-/*
- TODO backup de mis datos
-    "path": "/yuneta/realms/mulesol/mulesol.yunetacontrol.dev/controlcenter^mulesol/temp",
-    "filename": "treedb_controlcenter-4-2021-02-24.trdb.json"
-*/
 
 
 

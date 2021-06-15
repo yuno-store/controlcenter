@@ -468,8 +468,6 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj
         );
     }
 
-    json_t *jn_data = json_array();
-
     json_t *jn_filter = json_pack("{s:s, s:s}",
         "__gclass_name__", GCLASS_IEVENT_SRV_NAME,
         "__state__", "ST_SESSION"
@@ -491,6 +489,15 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj
 
         json_t *kw_agent = json_object();
 
+        json_t *jn_msg_id = json_pack("{s:s}",
+            "requester", gobj_name(src)
+        );
+        msg_iev_push_stack(
+            kw_agent,
+            "requester_stack",
+            jn_msg_id
+        );
+
         json_t *jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, TRUE);
         msg_iev_push_stack(
             kw_agent,
@@ -505,13 +512,8 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj
 
     rc_free_iter(dl_childs, TRUE, 0);
 
-    return msg_iev_build_webix(gobj,
-        0,
-        0,
-        0,
-        jn_data,
-        kw  // owned
-    );
+    KW_DECREF(kw);
+    return 0;   // Asynchronous response
 }
 
 
@@ -610,19 +612,25 @@ PRIVATE int ac_stats_yuno_answer(hgobj gobj, const char *event, json_t *kw, hgob
  ***************************************************************************/
 PRIVATE int ac_command_yuno_answer(hgobj gobj, const char *event, json_t *kw, hgobj src)
 {
-    json_t *jn_ievent_id = msg_iev_pop_stack(kw, IEVENT_MESSAGE_AREA_ID);
+    PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
-    const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
-    if(strcmp(dst_service, gobj_name(gobj))==0) {
-        // Comando directo del agente
-        JSON_DECREF(jn_ievent_id);
+    json_t *jn_request = msg_iev_pop_stack(kw, "requester_stack");
+    if(!jn_request) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "no requester_stack",
+            NULL
+        );
         KW_DECREF(kw);
         return 0;
     }
 
+    const char *requester = kw_get_str(jn_request, "requester", 0, 0);
     hgobj gobj_requester = gobj_child_by_name(
-        gobj_child_by_name(gobj, "__input_side__", 0),
-        dst_service,
+        priv->gobj_top_side,
+        requester,
         0
     );
     if(!gobj_requester) {
@@ -630,14 +638,18 @@ PRIVATE int ac_command_yuno_answer(hgobj gobj, const char *event, json_t *kw, hg
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "child not found",
-            "child",        "%s", dst_service,
+            "msg",          "%s", "gobj_requester not found",
+            "requester",    "%s", requester,
             NULL
         );
-        JSON_DECREF(jn_ievent_id);
+        JSON_DECREF(jn_request);
         KW_DECREF(kw);
         return 0;
     }
+
+    JSON_DECREF(jn_request);
+
+    json_t *jn_ievent_id = msg_iev_pop_stack(kw, IEVENT_MESSAGE_AREA_ID);
     JSON_DECREF(jn_ievent_id);
 
     KW_INCREF(kw);

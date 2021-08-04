@@ -561,21 +561,30 @@ PRIVATE int ac_on_close(hgobj gobj, const char *event, json_t *kw, hgobj src)
 PRIVATE int ac_stats_yuno_answer(hgobj gobj, const char *event, json_t *kw, hgobj src)
 {
     json_t *jn_ievent_id = msg_iev_pop_stack(kw, IEVENT_MESSAGE_AREA_ID);
-
     const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
 
     hgobj gobj_requester = gobj_child_by_name(
-        gobj_child_by_name(gobj, "__input_side__", 0),
+        gobj_find_service("__top_side__", TRUE),
         dst_service,
         0
     );
+    JSON_DECREF(jn_ievent_id);
+
+    if(!gobj_requester) {
+        // Debe venir del agent
+        jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
+        JSON_INCREF(jn_ievent_id);
+        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        gobj_requester = gobj_find_service(dst_service, TRUE);
+    }
+
     if(!gobj_requester) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "child not found",
-            "child",        "%s", dst_service,
+            "msg",          "%s", "service not found",
+            "service",      "%s", dst_service,
             NULL
         );
         JSON_DECREF(jn_ievent_id);
@@ -585,7 +594,7 @@ PRIVATE int ac_stats_yuno_answer(hgobj gobj, const char *event, json_t *kw, hgob
     JSON_DECREF(jn_ievent_id);
 
     KW_INCREF(kw);
-    json_t *kw_redirect = msg_iev_answer(gobj, kw, kw, 0);
+    json_t *kw_redirect = msg_iev_answer(gobj, kw, kw, 0); // "__answer__"
 
     return gobj_send_event(
         gobj_requester,

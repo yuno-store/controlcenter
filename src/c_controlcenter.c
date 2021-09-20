@@ -48,7 +48,7 @@ SDATA_END()
 PRIVATE sdata_desc_t pm_command_agent[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
 SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id"),
-SDATAPM (ASN_OCTET_STR, "cmd",          0,              0,          "command to agent"),
+SDATAPM (ASN_OCTET_STR, "cmd2agent",    0,              0,          "command to agent"),
 SDATA_END()
 };
 
@@ -452,16 +452,36 @@ PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj s
 /***************************************************************************
  *
  ***************************************************************************/
-PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
+PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgobj src)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
-    const char *id = kw_get_str(kw, "agent_id", "", 0);
-    const char *cmd2agent = kw_get_str(kw, "cmd", "", 0);
+    json_t *kw = json_deep_copy(kw_);
+    KW_DECREF(kw_);
+
+    const char *keys2delete[] = { // WARNING parameters of command-yuno command of agent
+        "id",
+        "command",
+        "service",
+        "realm_id",
+        "yuno_role",
+        "yuno_name",
+        "yuno_release",
+        "yuno_tag",
+        "yuno_disabled",
+        "yuno_running",
+        0
+    };
+    for(int i=0; keys2delete[i]!=0; i++) {
+        json_object_del(kw, keys2delete[i]);
+    }
+
+    const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
+    const char *cmd2agent = kw_get_str(kw, "cmd2agent", "", 0);
 
     if(empty_string(cmd2agent)) {
         return msg_iev_build_webix(gobj,
             -1,
-            json_string("What command?"),
+            json_string("What cmd2agent?"),
             0,
             0,
             kw  // owned
@@ -478,9 +498,9 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj
     i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
     while(i_hs) {
         json_t *jn_attrs = gobj_read_json_attr(child, "attrs");
-        if(!empty_string(id)) {
+        if(!empty_string(agent_id)) {
             const char *id_ = kw_get_str(jn_attrs, "id", "", 0);
-            if(strcmp(id_, id)!=0) {
+            if(strcmp(id_, agent_id)!=0) {
                 i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
                 continue;
             }

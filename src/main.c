@@ -32,6 +32,9 @@ PRIVATE char fixed_config[]= "\
     }                                                               \n\
 }                                                                   \n\
 ";
+
+// TODO usuarios de mulesol fuera
+
 PRIVATE char variable_config[]= "\
 {                                                                   \n\
     'environment': {                                                \n\

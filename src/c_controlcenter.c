@@ -53,7 +53,7 @@ SDATA_END()
 };
 PRIVATE sdata_desc_t pm_write_tty[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
-SDATAPM (ASN_OCTET_STR, "name",         0,              0,          "Name of console"),
+SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id"),
 SDATAPM (ASN_OCTET_STR, "content64",    0,              0,          "Content64 data to write to tty"),
 SDATA_END()
 };
@@ -66,7 +66,7 @@ PRIVATE sdata_desc_t command_table[] = {
 SDATACM (ASN_SCHEMA,    "help",             a_help,             pm_help,        cmd_help,       "Command's help"),
 SDATACM (ASN_SCHEMA,    "list-agents",      0,                  pm_list_agents, cmd_list_agents, "List connected agents"),
 SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,                  pm_command_agent,cmd_command_agent,"Command to agent. WARNING: parameter's keys are not checked"),
-SDATACM2 (ASN_SCHEMA,   "write-tty",        0,                  a_write_tty,        pm_write_tty,   0,              "Write data to tty"),
+SDATACM2 (ASN_SCHEMA,   "write-tty",        0,                  a_write_tty,        pm_write_tty,   0,              "Write data to tty (internal use)"),
 
 SDATA_END()
 };

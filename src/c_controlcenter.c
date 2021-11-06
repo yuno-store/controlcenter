@@ -51,14 +51,23 @@ SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id"),
 SDATAPM (ASN_OCTET_STR, "cmd2agent",    0,              0,          "command to agent"),
 SDATA_END()
 };
+PRIVATE sdata_desc_t pm_write_tty[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "name",         0,              0,          "Name of console"),
+SDATAPM (ASN_OCTET_STR, "content64",    0,              0,          "Content64 data to write to tty"),
+SDATA_END()
+};
 
 PRIVATE const char *a_help[] = {"h", "?", 0};
+PRIVATE const char *a_write_tty[] = {"EV_WRITE_TTY", 0};
 
 PRIVATE sdata_desc_t command_table[] = {
 /*-CMD---type-----------name----------------alias---------------items-----------json_fn---------description---------- */
 SDATACM (ASN_SCHEMA,    "help",             a_help,             pm_help,        cmd_help,       "Command's help"),
 SDATACM (ASN_SCHEMA,    "list-agents",      0,                  pm_list_agents, cmd_list_agents, "List connected agents"),
 SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,                  pm_command_agent,cmd_command_agent,"Command to agent. WARNING: parameter's keys are not checked"),
+SDATACM2 (ASN_SCHEMA,   "write-tty",        0,                  a_write_tty,        pm_write_tty,   0,              "Write data to tty"),
+
 SDATA_END()
 };
 
@@ -674,6 +683,198 @@ PRIVATE int ac_command_yuno_answer(hgobj gobj, const char *event, json_t *kw, hg
 }
 
 /***************************************************************************
+ *  HACK nodo intermedio
+ ***************************************************************************/
+PRIVATE int ac_tty_mirror_open(hgobj gobj, const char *event, json_t *kw, hgobj src)
+{
+    json_t *jn_ievent_id = msg_iev_pop_stack(kw, IEVENT_MESSAGE_AREA_ID);
+    const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+
+    hgobj gobj_requester = gobj_child_by_name(
+        gobj_find_service("__top_side__", TRUE),
+        dst_service,
+        0
+    );
+    JSON_DECREF(jn_ievent_id);
+
+    if(!gobj_requester) {
+        // Debe venir del agent
+        jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
+        JSON_INCREF(jn_ievent_id);
+        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        gobj_requester = gobj_find_service(dst_service, TRUE);
+    }
+
+    if(!gobj_requester) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "service not found",
+            "service",      "%s", dst_service,
+            NULL
+        );
+        JSON_DECREF(jn_ievent_id);
+        KW_DECREF(kw);
+        return 0;
+    }
+    JSON_DECREF(jn_ievent_id);
+
+    KW_INCREF(kw);
+    json_t *kw_redirect = msg_iev_answer(gobj, kw, kw, 0); // "__answer__"
+
+    return gobj_send_event(
+        gobj_requester,
+        event,
+        kw_redirect,
+        gobj
+    );
+}
+
+/***************************************************************************
+ *  HACK nodo intermedio
+ ***************************************************************************/
+PRIVATE int ac_tty_mirror_close(hgobj gobj, const char *event, json_t *kw, hgobj src)
+{
+    json_t *jn_ievent_id = msg_iev_pop_stack(kw, IEVENT_MESSAGE_AREA_ID);
+    const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+
+    hgobj gobj_requester = gobj_child_by_name(
+        gobj_find_service("__top_side__", TRUE),
+        dst_service,
+        0
+    );
+    JSON_DECREF(jn_ievent_id);
+
+    if(!gobj_requester) {
+        // Debe venir del agent
+        jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
+        JSON_INCREF(jn_ievent_id);
+        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        gobj_requester = gobj_find_service(dst_service, TRUE);
+    }
+
+    if(!gobj_requester) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "service not found",
+            "service",      "%s", dst_service,
+            NULL
+        );
+        JSON_DECREF(jn_ievent_id);
+        KW_DECREF(kw);
+        return 0;
+    }
+    JSON_DECREF(jn_ievent_id);
+
+    KW_INCREF(kw);
+    json_t *kw_redirect = msg_iev_answer(gobj, kw, kw, 0); // "__answer__"
+
+    return gobj_send_event(
+        gobj_requester,
+        event,
+        kw_redirect,
+        gobj
+    );
+}
+
+/***************************************************************************
+ *  HACK nodo intermedio
+ ***************************************************************************/
+PRIVATE int ac_tty_mirror_data(hgobj gobj, const char *event, json_t *kw, hgobj src)
+{
+    json_t *jn_ievent_id = msg_iev_pop_stack(kw, IEVENT_MESSAGE_AREA_ID);
+    const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+
+    hgobj gobj_requester = gobj_child_by_name(
+        gobj_find_service("__top_side__", TRUE),
+        dst_service,
+        0
+    );
+    JSON_DECREF(jn_ievent_id);
+
+    if(!gobj_requester) {
+        // Debe venir del agent
+        jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
+        JSON_INCREF(jn_ievent_id);
+        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        gobj_requester = gobj_find_service(dst_service, TRUE);
+    }
+
+    if(!gobj_requester) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "service not found",
+            "service",      "%s", dst_service,
+            NULL
+        );
+        JSON_DECREF(jn_ievent_id);
+        KW_DECREF(kw);
+        return 0;
+    }
+    JSON_DECREF(jn_ievent_id);
+
+    KW_INCREF(kw);
+    json_t *kw_redirect = msg_iev_answer(gobj, kw, kw, 0); // "__answer__"
+
+    return gobj_send_event(
+        gobj_requester,
+        event,
+        kw_redirect,
+        gobj
+    );
+}
+
+/***************************************************************************
+ *  HACK nodo intermedio, pero al reves(???)
+ ***************************************************************************/
+PRIVATE int ac_write_tty(hgobj gobj, const char *event, json_t *kw, hgobj src)
+{
+    PRIVATE_DATA *priv = gobj_priv_data(gobj);
+
+    const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
+
+    json_t *jn_filter = json_pack("{s:s, s:s}",
+        "__gclass_name__", GCLASS_IEVENT_SRV_NAME,
+        "__state__", "ST_SESSION"
+    );
+    dl_list_t *dl_childs = gobj_match_childs_tree(priv->gobj_input_side, 0, jn_filter);
+
+    hgobj child; rc_instance_t *i_hs;
+    i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
+    while(i_hs) {
+        json_t *jn_attrs = gobj_read_json_attr(child, "attrs");
+        if(!empty_string(agent_id)) {
+            const char *id_ = kw_get_str(jn_attrs, "id", "", 0);
+            if(strcmp(id_, agent_id)!=0) {
+                i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+                continue;
+            }
+
+        }
+
+        json_t *webix = gobj_command( // debe retornar siempre 0.
+            child,
+            "write-tty",
+            json_incref(kw),
+            src
+        );
+        JSON_DECREF(webix);
+
+        i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+    }
+
+    rc_free_iter(dl_childs, TRUE, 0);
+
+    KW_DECREF(kw);
+    return 0;   // Asynchronous response
+}
+
+/***************************************************************************
  *
  ***************************************************************************/
 PRIVATE int ac_timeout(hgobj gobj, const char *event, json_t *kw, hgobj src)
@@ -704,10 +905,14 @@ PRIVATE int ac_timeout(hgobj gobj, const char *event, json_t *kw, hgobj src)
  ***************************************************************************/
 PRIVATE const EVENT input_events[] = {
     // top input
+    {"EV_MT_COMMAND_ANSWER",    EVF_PUBLIC_EVENT,   0,  0},
+    {"EV_TTY_DATA",             EVF_PUBLIC_EVENT,   0, 0},
+    {"EV_MT_STATS_ANSWER",      EVF_PUBLIC_EVENT,   0,  0},
+    {"EV_WRITE_TTY",            0,  0,  0},
     {"EV_ON_OPEN",              0,  0,  0},
     {"EV_ON_CLOSE",             0,  0,  0},
-    {"EV_MT_STATS_ANSWER",      EVF_PUBLIC_EVENT,  0,  0},
-    {"EV_MT_COMMAND_ANSWER",    EVF_PUBLIC_EVENT,  0,  0},
+    {"EV_TTY_OPEN",             EVF_PUBLIC_EVENT,   0, 0},
+    {"EV_TTY_CLOSE",            EVF_PUBLIC_EVENT,   0, 0},
     // bottom input
     {"EV_TIMEOUT",              0,  0,  0},
     {"EV_STOPPED",              0,  0,  0},
@@ -723,10 +928,14 @@ PRIVATE const char *state_names[] = {
 };
 
 PRIVATE EV_ACTION ST_IDLE[] = {
-    {"EV_ON_OPEN",                  ac_on_open,                 0},
-    {"EV_ON_CLOSE",                 ac_on_close,                0},
     {"EV_MT_STATS_ANSWER",          ac_stats_yuno_answer,       0},
     {"EV_MT_COMMAND_ANSWER",        ac_command_yuno_answer,     0},
+    {"EV_TTY_DATA",                 ac_tty_mirror_data,         0},
+    {"EV_WRITE_TTY",                ac_write_tty,               0},
+    {"EV_ON_OPEN",                  ac_on_open,                 0},
+    {"EV_ON_CLOSE",                 ac_on_close,                0},
+    {"EV_TTY_OPEN",                 ac_tty_mirror_open,         0},
+    {"EV_TTY_CLOSE",                ac_tty_mirror_close,        0},
     {"EV_TIMEOUT",                  ac_timeout,                 0},
     {"EV_STOPPED",                  0,                          0},
     {0,0,0}

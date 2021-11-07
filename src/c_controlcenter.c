@@ -31,6 +31,7 @@
  *          Data: config, public data, private data
  ***************************************************************************/
 PRIVATE json_t *cmd_help(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
+PRIVATE json_t *cmd_authzs(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 
@@ -38,6 +39,12 @@ PRIVATE sdata_desc_t pm_help[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
 SDATAPM (ASN_OCTET_STR, "cmd",          0,              0,          "command about you want help."),
 SDATAPM (ASN_UNSIGNED,  "level",        0,              0,          "command search level in childs"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_authzs[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "authz",        0,              0,          "permission to search"),
+SDATAPM (ASN_OCTET_STR, "service",      0,              0,          "Service where to search the permission. If empty print all service's permissions"),
 SDATA_END()
 };
 PRIVATE sdata_desc_t pm_list_agents[] = {
@@ -64,9 +71,10 @@ PRIVATE const char *a_write_tty[] = {"EV_WRITE_TTY", 0};
 PRIVATE sdata_desc_t command_table[] = {
 /*-CMD---type-----------name----------------alias---------------items-----------json_fn---------description---------- */
 SDATACM (ASN_SCHEMA,    "help",             a_help,             pm_help,        cmd_help,       "Command's help"),
+SDATACM2 (ASN_SCHEMA,   "authzs",           0,                  0,              pm_authzs,      cmd_authzs,     "Authorization's help"),
 SDATACM (ASN_SCHEMA,    "list-agents",      0,                  pm_list_agents, cmd_list_agents, "List connected agents"),
 SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,                  pm_command_agent,cmd_command_agent,"Command to agent. WARNING: parameter's keys are not checked"),
-SDATACM2 (ASN_SCHEMA,   "write-tty",        0,                  a_write_tty,        pm_write_tty,   0,              "Write data to tty (internal use)"),
+SDATACM2 (ASN_SCHEMA,   "write-tty",        0,                  a_write_tty,    pm_write_tty,   0,              "Write data to tty (internal use)"),
 
 SDATA_END()
 };
@@ -103,6 +111,17 @@ PRIVATE const trace_level_t s_user_trace_level[16] = {
 {0, 0},
 };
 
+/*---------------------------------------------*
+ *      GClass authz levels
+ *---------------------------------------------*/
+
+PRIVATE sdata_desc_t authz_table[] = {
+/*-AUTHZ-- type---------name----------------flag----alias---items---description--*/
+SDATAAUTHZ (ASN_SCHEMA, "list-agents",      0,      0,      0,      "Permission to list remote agents"),
+SDATAAUTHZ (ASN_SCHEMA, "command-agent",    0,      0,      0,      "Permission to send command to remote agent"),
+SDATAAUTHZ (ASN_SCHEMA, "write-tty",        0,      0,      0,      "Internal use. Feed remote consola from local keyboard"),
+SDATA_END()
+};
 
 /*---------------------------------------------*
  *              Private data
@@ -422,11 +441,37 @@ PRIVATE json_t *cmd_help(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
 /***************************************************************************
  *
  ***************************************************************************/
+PRIVATE json_t *cmd_authzs(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
+{
+    return gobj_build_authzs_doc(gobj, cmd, kw, src);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
 PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
     BOOL expand = kw_get_bool(kw, "expand", 0, KW_WILD_NUMBER);
 
+    /*----------------------------------------*
+     *  Check AUTHZS
+     *----------------------------------------*/
+    const char *permission = "list-agents";
+    if(!gobj_user_has_authz(gobj, permission, kw_incref(kw), src)) {
+        return msg_iev_build_webix(
+            gobj,
+            -1,
+            json_sprintf("No permission to '%s'", permission),
+            0,
+            0,
+            kw  // owned
+        );
+    }
+
+    /*----------------------------------------*
+     *  Job
+     *----------------------------------------*/
     json_t *jn_data = json_array();
 
     json_t *jn_filter = json_pack("{s:s, s:s}",
@@ -467,6 +512,24 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgob
     json_t *kw = json_deep_copy(kw_);
     KW_DECREF(kw_);
 
+    /*----------------------------------------*
+     *  Check AUTHZS
+     *----------------------------------------*/
+    const char *permission = "command-agent";
+    if(!gobj_user_has_authz(gobj, permission, kw_incref(kw), src)) {
+        return msg_iev_build_webix(
+            gobj,
+            -1,
+            json_sprintf("No permission to '%s'", permission),
+            0,
+            0,
+            kw  // owned
+        );
+    }
+
+    /*----------------------------------------*
+     *  Job
+     *----------------------------------------*/
     const char *keys2delete[] = { // WARNING parameters of command-yuno command of agent
         "id",
         "command",
@@ -836,6 +899,32 @@ PRIVATE int ac_write_tty(hgobj gobj, const char *event, json_t *kw, hgobj src)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
+    /*----------------------------------------*
+     *  Check AUTHZS TODO función interna para todos? marca con flag
+     *----------------------------------------*/
+    const char *permission = "write-tty";
+    if(!gobj_user_has_authz(gobj, permission, kw_incref(kw), src)) {
+        gobj_send_event(
+            src,
+            event,
+                msg_iev_build_webix(
+                gobj,
+                -1,
+                json_sprintf("No permission to '%s'", permission),
+                0,
+                0,
+                kw  // owned
+            ),
+            gobj
+        );
+        KW_DECREF(kw);
+        return 0;
+    }
+
+    /*----------------------------------------*
+     *  Job
+     *----------------------------------------*/
+
     const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
 
     json_t *jn_filter = json_pack("{s:s, s:s}",
@@ -871,7 +960,7 @@ PRIVATE int ac_write_tty(hgobj gobj, const char *event, json_t *kw, hgobj src)
     rc_free_iter(dl_childs, TRUE, 0);
 
     KW_DECREF(kw);
-    return 0;   // Asynchronous response
+    return 0;
 }
 
 /***************************************************************************
@@ -1039,7 +1128,7 @@ PRIVATE GCLASS _gclass = {
     lmt,
     tattr_desc,
     sizeof(PRIVATE_DATA),
-    0,  // acl
+    authz_table,  // acl
     s_user_trace_level,
     command_table,  // command_table
     0,  // gcflag

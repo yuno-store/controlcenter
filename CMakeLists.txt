@@ -78,6 +78,7 @@ TARGET_LINK_LIBRARIES(controlcenter
 
     z rt m
     uuid
+    util
 )
 
 ##############################################

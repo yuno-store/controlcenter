@@ -566,6 +566,7 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgob
     );
     dl_list_t *dl_childs = gobj_match_childs_tree(priv->gobj_input_side, 0, jn_filter);
 
+    int some = 0;
     hgobj child; rc_instance_t *i_hs;
     i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
     while(i_hs) {
@@ -586,14 +587,21 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgob
             src
         );
         JSON_DECREF(webix);
+        some++;
 
         i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
     }
 
     rc_free_iter(dl_childs, TRUE, 0);
 
-    KW_DECREF(kw);
-    return 0;   // Asynchronous response
+
+    return msg_iev_build_webix(gobj, // Asynchronous response too
+        some?0:-1,
+        json_sprintf("Command sent to %d nodes", some),
+        0,
+        0,
+        kw  // owned
+    );
 }
 
 

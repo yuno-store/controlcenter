@@ -49,7 +49,7 @@ SDATA_END()
 };
 PRIVATE sdata_desc_t pm_list_agents[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
-SDATAPM (ASN_BOOLEAN,  "expand",        0,              0,          "Expand details"),
+SDATAPM (ASN_UNSIGNED,  "expand",        0,              0,          "Expand details"),
 SDATA_END()
 };
 PRIVATE sdata_desc_t pm_command_agent[] = {
@@ -452,7 +452,7 @@ PRIVATE json_t *cmd_authzs(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
 PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj src)
 {
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
-    BOOL expand = kw_get_bool(kw, "expand", 0, KW_WILD_NUMBER);
+    int expand = kw_get_int(kw, "expand", 0, KW_WILD_NUMBER);
 
     /*----------------------------------------*
      *  Check AUTHZS
@@ -487,7 +487,12 @@ PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj s
         if(expand) {
             json_array_append(jn_data, jn_attrs);
         } else {
-            json_array_append_new(jn_data, json_string(kw_get_str(jn_attrs, "id", "", 0)));
+            json_array_append_new(jn_data,
+                json_sprintf("%s %s",
+                    kw_get_str(jn_attrs, "id", "", 0),
+                    kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0)
+                )
+            );
         }
         i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
     }

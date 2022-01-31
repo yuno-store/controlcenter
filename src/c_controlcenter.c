@@ -488,7 +488,7 @@ PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj s
             json_array_append(jn_data, jn_attrs);
         } else {
             json_array_append_new(jn_data,
-                json_sprintf("%s %s",
+                json_sprintf("UUID:%s, HOSTNAME:'%s'",
                     kw_get_str(jn_attrs, "id", "", 0),
                     kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0)
                 )
@@ -578,11 +578,11 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgob
         json_t *jn_attrs = gobj_read_json_attr(child, "attrs");
         if(!empty_string(agent_id)) {
             const char *id_ = kw_get_str(jn_attrs, "id", "", 0);
-            if(strcmp(id_, agent_id)!=0) {
+            const char *host_ = kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0);
+            if(strcmp(id_, agent_id)!=0 || strcmp(id_, host_)!=0) {
                 i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
                 continue;
             }
-
         }
 
         json_t *webix = gobj_command( // debe retornar siempre 0.

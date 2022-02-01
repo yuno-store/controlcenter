@@ -656,6 +656,28 @@ PRIVATE int ac_on_open(hgobj gobj, const char *event, json_t *kw, hgobj src)
  ***************************************************************************/
 PRIVATE int ac_on_close(hgobj gobj, const char *event, json_t *kw, hgobj src)
 {
+    hgobj channel_gobj = (hgobj)(size_t)kw_get_int(kw, "__temp__`channel_gobj", 0, KW_REQUIRED);
+    const char *dst_service = json_string_value(
+        gobj_read_user_data(channel_gobj, "tty_mirror_dst_service")
+    );
+
+    if(!empty_string(dst_service)) {
+        hgobj gobj_requester = gobj_child_by_name(
+            gobj_find_service("__top_side__", TRUE),
+            dst_service,
+            0
+        );
+
+        if(!gobj_requester) {
+            // Debe venir del agent
+        }
+
+        if(gobj_requester) {
+            gobj_write_user_data(channel_gobj, "tty_mirror_dst_service", json_string(""));
+            gobj_send_event(gobj_requester, "EV_DROP", 0, gobj);
+        }
+    }
+
     KW_DECREF(kw);
     return 0;
 }
@@ -679,7 +701,7 @@ PRIVATE int ac_stats_yuno_answer(hgobj gobj, const char *event, json_t *kw, hgob
         // Debe venir del agent
         jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
         JSON_INCREF(jn_ievent_id);
-        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
         gobj_requester = gobj_find_service(dst_service, TRUE);
     }
 
@@ -728,7 +750,7 @@ PRIVATE int ac_command_yuno_answer(hgobj gobj, const char *event, json_t *kw, hg
         // Debe venir del agent
         jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
         JSON_INCREF(jn_ievent_id);
-        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
         gobj_requester = gobj_find_service(dst_service, TRUE);
     }
 
@@ -777,7 +799,7 @@ PRIVATE int ac_tty_mirror_open(hgobj gobj, const char *event, json_t *kw, hgobj 
         // Debe venir del agent
         jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
         JSON_INCREF(jn_ievent_id);
-        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
         gobj_requester = gobj_find_service(dst_service, TRUE);
     }
 
@@ -794,6 +816,10 @@ PRIVATE int ac_tty_mirror_open(hgobj gobj, const char *event, json_t *kw, hgobj 
         KW_DECREF(kw);
         return 0;
     }
+
+    hgobj channel_gobj = (hgobj)(size_t)kw_get_int(kw, "__temp__`channel_gobj", 0, KW_REQUIRED);
+    gobj_write_user_data(channel_gobj, "tty_mirror_dst_service", json_string(dst_service));
+
     JSON_DECREF(jn_ievent_id);
 
     KW_INCREF(kw);
@@ -826,7 +852,7 @@ PRIVATE int ac_tty_mirror_close(hgobj gobj, const char *event, json_t *kw, hgobj
         // Debe venir del agent
         jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
         JSON_INCREF(jn_ievent_id);
-        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
         gobj_requester = gobj_find_service(dst_service, TRUE);
     }
 
@@ -843,6 +869,10 @@ PRIVATE int ac_tty_mirror_close(hgobj gobj, const char *event, json_t *kw, hgobj
         KW_DECREF(kw);
         return 0;
     }
+
+    hgobj channel_gobj = (hgobj)(size_t)kw_get_int(kw, "__temp__`channel_gobj", 0, KW_REQUIRED);
+    gobj_write_user_data(channel_gobj, "tty_mirror_dst_service", json_string(""));
+
     JSON_DECREF(jn_ievent_id);
 
     KW_INCREF(kw);
@@ -875,7 +905,7 @@ PRIVATE int ac_tty_mirror_data(hgobj gobj, const char *event, json_t *kw, hgobj 
         // Debe venir del agent
         jn_ievent_id = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID, 0);
         JSON_INCREF(jn_ievent_id);
-        const char *dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
+        dst_service = kw_get_str(jn_ievent_id, "dst_service", "", 0);
         gobj_requester = gobj_find_service(dst_service, TRUE);
     }
 
@@ -937,7 +967,6 @@ PRIVATE int ac_write_tty(hgobj gobj, const char *event, json_t *kw, hgobj src)
     /*----------------------------------------*
      *  Job
      *----------------------------------------*/
-
     const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
 
     json_t *jn_filter = json_pack("{s:s, s:s}",
@@ -946,6 +975,7 @@ PRIVATE int ac_write_tty(hgobj gobj, const char *event, json_t *kw, hgobj src)
     );
     dl_list_t *dl_childs = gobj_match_childs_tree(priv->gobj_input_side, 0, jn_filter);
 
+    int some = 0;
     hgobj child; rc_instance_t *i_hs;
     i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
     while(i_hs) {
@@ -965,12 +995,17 @@ PRIVATE int ac_write_tty(hgobj gobj, const char *event, json_t *kw, hgobj src)
             json_incref(kw),
             src
         );
+        some++;
         JSON_DECREF(webix);
 
         i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
     }
 
     rc_free_iter(dl_childs, TRUE, 0);
+
+    if(!some) {
+        gobj_send_event(src, "EV_DROP", 0, gobj);
+    }
 
     KW_DECREF(kw);
     return 0;

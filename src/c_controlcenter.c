@@ -54,7 +54,7 @@ SDATA_END()
 };
 PRIVATE sdata_desc_t pm_command_agent[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
-SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id"),
+SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id (UUID or HOSTNAME)"),
 SDATAPM (ASN_OCTET_STR, "cmd2agent",    0,              0,          "command to agent"),
 SDATA_END()
 };
@@ -73,7 +73,7 @@ PRIVATE sdata_desc_t command_table[] = {
 SDATACM (ASN_SCHEMA,    "help",             a_help,             pm_help,        cmd_help,       "Command's help"),
 SDATACM2 (ASN_SCHEMA,   "authzs",           0,                  0,              pm_authzs,      cmd_authzs,     "Authorization's help"),
 SDATACM (ASN_SCHEMA,    "list-agents",      0,                  pm_list_agents, cmd_list_agents, "List connected agents"),
-SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,                  pm_command_agent,cmd_command_agent,"Command to agent. WARNING: parameter's keys are not checked"),
+SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,                  pm_command_agent,cmd_command_agent,"Command to agent (agent id = UUID or HOSTNAME)"),
 SDATACM2 (ASN_SCHEMA,   "write-tty",        0,                  a_write_tty,    pm_write_tty,   0,              "Write data to tty (internal use)"),
 
 SDATA_END()

@@ -579,7 +579,7 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgob
         if(!empty_string(agent_id)) {
             const char *id_ = kw_get_str(jn_attrs, "id", "", 0);
             const char *host_ = kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0);
-            if(strcmp(id_, agent_id)!=0 && strcmp(id_, host_)!=0) {
+            if(strcmp(id_, agent_id)!=0 && strcmp(host_, agent_id)!=0) {
                 i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
                 continue;
             }

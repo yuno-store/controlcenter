@@ -232,8 +232,8 @@ int main(int argc, char *argv[])
     gobj_set_gclass_trace(GCLASS_IEVENT_CLI, "identity-card", TRUE);
 
 // Samples
-//     gobj_set_gclass_trace(GCLASS_IEVENT_CLI, "ievents2", TRUE);
-//     gobj_set_gclass_trace(GCLASS_IEVENT_SRV, "ievents2", TRUE);
+     gobj_set_gclass_trace(GCLASS_IEVENT_CLI, "ievents2", TRUE);
+     gobj_set_gclass_trace(GCLASS_IEVENT_SRV, "ievents2", TRUE);
 //     gobj_set_gclass_trace(GCLASS_CONTROLCENTER, "messages", TRUE);
 
 //     gobj_set_gobj_trace(0, "create_delete", TRUE, 0);

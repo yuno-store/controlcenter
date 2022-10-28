@@ -132,8 +132,10 @@ typedef struct _PRIVATE_DATA {
 
     hgobj gobj_top_side;
     hgobj gobj_input_side;
+
     hgobj gobj_treedbs;
     hgobj gobj_treedb_controlcenter;
+    hgobj gobj_authz;
 
     uint64_t *ptxMsgs;
     uint64_t *prxMsgs;
@@ -354,17 +356,21 @@ PRIVATE int mt_play(hgobj gobj)
     json_decref(jn_resp);
 
     priv->gobj_treedb_controlcenter = gobj_find_service("treedb_controlcenter", TRUE);
+    gobj_subscribe_event(priv->gobj_treedb_controlcenter, 0, 0, gobj);
 
-    /*---------------------------------------*
-     *      Start __top_side__
-     *---------------------------------------*/
+    /*-----------------------------*
+     *      Get Authzs service
+     *-----------------------------*/
+    priv->gobj_authz =  gobj_find_service("authz", TRUE);
+    gobj_subscribe_event(priv->gobj_authz, 0, 0, gobj);
+
+    /*-------------------------*
+     *      Start services
+     *-------------------------*/
     priv->gobj_top_side = gobj_find_service("__top_side__", TRUE);
     gobj_subscribe_event(priv->gobj_top_side, 0, 0, gobj);
     gobj_start_tree(priv->gobj_top_side);
 
-    /*---------------------------------------*
-     *      Start __input_side__
-     *---------------------------------------*/
     priv->gobj_input_side = gobj_find_service("__input_side__", TRUE);
     gobj_subscribe_event(priv->gobj_input_side, 0, 0, gobj);
     gobj_start_tree(priv->gobj_input_side);
@@ -380,16 +386,12 @@ PRIVATE int mt_pause(hgobj gobj)
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
     /*---------------------------------------*
-     *      Stop __top_side__
+     *      Stop services
      *---------------------------------------*/
     if(priv->gobj_top_side) {
         gobj_unsubscribe_event(priv->gobj_top_side, 0, 0, gobj);
         EXEC_AND_RESET(gobj_stop_tree, priv->gobj_top_side);
     }
-
-    /*---------------------------------------*
-     *      Input __input_side__
-     *---------------------------------------*/
     if(priv->gobj_input_side) {
         gobj_unsubscribe_event(priv->gobj_input_side, 0, 0, gobj);
         EXEC_AND_RESET(gobj_stop_tree, priv->gobj_input_side);

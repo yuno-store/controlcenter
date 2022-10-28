@@ -1751,6 +1751,181 @@ PRIVATE int ac_treedb_node_deleted(hgobj gobj, const char *event, json_t *kw, hg
 
 /***************************************************************************
  *
+ {
+    "username": "yuneta_agent@mulesol.es",
+    "dst_service": "controlcenter",
+    "user": {
+        "id": "yuneta_agent@mulesol.es",
+        "roles": [
+            {
+                "id": "controlcenter",
+                "topic_name": "roles",
+                "hook_name": "users"
+            }
+        ],
+        "disabled": false,
+        "properties": {},
+        "time": 0,
+        "__sessions": {
+            "793e8631-8356-47ec-b811-e2efe2fd2ec8": {
+                "id": "793e8631-8356-47ec-b811-e2efe2fd2ec8",
+                "channel_gobj": 94438141520952
+            }
+        },
+        "_geometry": {
+            "x": 990,
+            "y": 340,
+            "width": 110,
+            "height": 80,
+            "__origin__": "me-6fcce598-0987-4c34-9fb0-0de8d998cd3d"
+        },
+        "__md_treedb__": {
+            "treedb_name": "treedb_authzs",
+            "topic_name": "users",
+            "__rowid__": 45,
+            "__t__": 1631448352,
+            "__tm__": 0,
+            "__tag__": 0,
+            "__pure_node__": false
+        }
+    },
+    "session": {
+        "id": "793e8631-8356-47ec-b811-e2efe2fd2ec8",
+        "channel_gobj": 94438141520952
+    },
+    "services_roles": {
+        "controlcenter": [
+            "controlcenter"
+        ]
+    },
+    "jwt_payload": {
+        "exp": 1977040064,
+        "iat": 1631440064,
+        "auth_time": 0,
+        "jti": "efe5db43-2b30-43a6-9411-328303783d15",
+        "iss": "http://localhost:8281/auth/realms/mulesol",
+        "aud": "yunetacontrol",
+        "sub": "f24512d4-2618-4e1f-9b64-10ae7d46e07d",
+        "typ": "ID",
+        "azp": "yunetacontrol",
+        "session_state": "793e8631-8356-47ec-b811-e2efe2fd2ec8",
+        "at_hash": "VoqtYD61IdSxvuDegzBJoA",
+        "acr": "1",
+        "email_verified": true,
+        "name": "Yuneta Agent",
+        "preferred_username": "yuneta_agent@mulesol.es",
+        "given_name": "Yuneta Agent",
+        "email": "yuneta_agent@mulesol.es"
+    }
+}
+
+DEBUG: {
+    "username": "ginsmar@mulesol.es",
+    "dst_service": "controlcenter",
+    "user": {
+        "id": "ginsmar@mulesol.es",
+        "roles": [
+            {
+                "id": "root",
+                "topic_name": "roles",
+                "hook_name": "users"
+            }
+        ],
+        "disabled": false,
+        "properties": {},
+        "time": 0,
+        "__sessions": {
+            "38e11e29-823c-40c3-adb3-a45719364c9c": {
+                "id": "38e11e29-823c-40c3-adb3-a45719364c9c",
+                "channel_gobj": 94438141390792
+            }
+        },
+        "_geometry": {
+            "x": 400,
+            "y": 350,
+            "width": 110,
+            "height": 80,
+            "__origin__": "me-6fcce598-0987-4c34-9fb0-0de8d998cd3d"
+        },
+        "__md_treedb__": {
+            "treedb_name": "treedb_authzs",
+            "topic_name": "users",
+            "__rowid__": 41,
+            "__t__": 1631448225,
+            "__tm__": 0,
+            "__tag__": 0,
+            "__pure_node__": false
+        }
+    },
+    "session": {
+        "id": "38e11e29-823c-40c3-adb3-a45719364c9c",
+        "channel_gobj": 94438141390792
+    },
+    "services_roles": {
+        "controlcenter": [
+            "root"
+        ],
+        "treedb_controlcenter": [
+            "root"
+        ],
+        "treedb_authzs": [
+            "root"
+        ]
+    },
+    "jwt_payload": {
+        "exp": 1667026950,
+        "iat": 1666970907,
+        "jti": "73860e4c-d79d-483e-830b-64c9b65c5e1b",
+        "iss": "https://localhost:8641/auth/realms/mulesol",
+        "aud": [
+            "realm-management",
+            "account"
+        ],
+        "sub": "0a1e5c27-80f1-4225-943a-edfbc204972d",
+        "typ": "Bearer",
+        "azp": "yunetacontrol",
+        "session_state": "38e11e29-823c-40c3-adb3-a45719364c9c",
+        "acr": "1",
+        "allowed-origins": [
+            "*"
+        ],
+        "realm_access": {
+            "roles": [
+                "offline_access",
+                "uma_authorization"
+            ]
+        },
+        "resource_access": {
+            "realm-management": {
+                "roles": [
+                    "manage-users",
+                    "view-users",
+                    "query-clients",
+                    "manage-clients",
+                    "query-groups",
+                    "query-users"
+                ]
+            },
+            "account": {
+                "roles": [
+                    "manage-account",
+                    "manage-account-links",
+                    "view-profile"
+                ]
+            }
+        },
+        "scope": "profile email",
+        "sid": "38e11e29-823c-40c3-adb3-a45719364c9c",
+        "email_verified": true,
+        "name": "Ginés Martínez",
+        "preferred_username": "ginsmar@mulesol.es",
+        "locale": "en",
+        "given_name": "Ginés",
+        "family_name": "Martínez",
+        "email": "ginsmar@mulesol.es"
+    }
+}
+
  ***************************************************************************/
 PRIVATE int ac_user_login(hgobj gobj, const char *event, json_t *kw, hgobj src)
 {

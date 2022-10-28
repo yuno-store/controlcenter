@@ -21,22 +21,25 @@
             │             system_id (↖) │ ──┘ 1
             │                           │
             │  description              │
+            │  properties               │
             │                           │
             │                  nodes {} │ ◀─────────┐N
             │                           │           │
-            │               managers {} │ ◀─┐N      │
+            │                  users {} │ ◀─┐N      │
             │                           │   │       │
             │  _geometry                │   │       │
             └───────────────────────────┘   │       │
                                             │       │
                                             │       │
-                        managers            │       │
+                        users               │       │
             ┌───────────────────────────┐   │       │
             │* id                       │   │       │
             │                           │   │       │
             │               systems [↖] │ ──┘n      │
             │                           │           │
+            │  enabled                  │           │
             │  properties               │           │
+            │  time                     │           │
             │  __sessions               │           │
             │  _geometry                │           │
             └───────────────────────────┘           │
@@ -51,6 +54,7 @@
             │  description              │
             │  provider                 │
             │  provider_url             │
+            │  properties               │
             │* ip                       │
             │                           │
             │               services {} │ ◀─────────┐N
@@ -134,13 +138,13 @@ TODO
 static char treedb_schema_controlcenter[]= "\
 {                                                                   \n\
     'id': 'treedb_controlcenter',                                   \n\
-    'schema_version': '1',                                          \n\
+    'schema_version': '2',                                          \n\
     'topics': [                                                     \n\
         {                                                           \n\
             'id': 'systems',                                        \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '2',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'System',                             \n\
@@ -179,6 +183,15 @@ static char treedb_schema_controlcenter[]= "\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
+                'properties': {                                     \n\
+                    'header': 'Properties',                         \n\
+                    'fillspace': 10,                                \n\
+                    'type': 'dict',                                 \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
                 'nodes': {                                          \n\
                     'header': 'Nodes',                              \n\
                     'type': 'object',                               \n\
@@ -188,13 +201,13 @@ static char treedb_schema_controlcenter[]= "\
                         'nodes': 'systems'                          \n\
                     }                                               \n\
                 },                                                  \n\
-                'managers': {                                       \n\
-                    'header': 'Managers',                           \n\
+                'users': {                                          \n\
+                    'header': 'Users',                              \n\
                     'type': 'object',                               \n\
                     'fillspace': 10,                                \n\
                     'flag': ['hook'],                               \n\
                     'hook': {                                       \n\
-                        'managers': 'systems'                       \n\
+                        'users': 'systems'                          \n\
                     }                                               \n\
                 },                                                  \n\
                 '_geometry': {                                      \n\
@@ -209,13 +222,13 @@ static char treedb_schema_controlcenter[]= "\
         },                                                          \n\
                                                                     \n\
         {                                                           \n\
-            'id': 'managers',                                       \n\
+            'id': 'users',                                          \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '2',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
-                    'header': 'Manager',                            \n\
+                    'header': 'User',                               \n\
                     'fillspace': 10,                                \n\
                     'type': 'string',                               \n\
                     'flag': [                                       \n\
@@ -231,12 +244,31 @@ static char treedb_schema_controlcenter[]= "\
                         'fkey'                                      \n\
                     ]                                               \n\
                 },                                                  \n\
+                'enabled': {                                        \n\
+                    'header': 'Enabled',                            \n\
+                    'fillspace': 4,                                 \n\
+                    'type': 'boolean',                              \n\
+                    'default': true,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
                 'properties': {                                     \n\
                     'header': 'Properties',                         \n\
                     'fillspace': 10,                                \n\
-                    'type': 'blob',                                 \n\
+                    'type': 'dict',                                 \n\
                     'flag': [                                       \n\
                         'writable',                                 \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'time': {                                           \n\
+                    'header': 'Created Time',                       \n\
+                    'type': 'integer',                              \n\
+                    'fillspace': 15,                                \n\
+                    'flag': [                                       \n\
+                        'time',                                     \n\
                         'persistent'                                \n\
                     ]                                               \n\
                 },                                                  \n\
@@ -262,7 +294,7 @@ static char treedb_schema_controlcenter[]= "\
             'id': 'nodes',                                          \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '2',                                   \n\
             'cols': {                                               \n\
                 'id': {                                             \n\
                     'header': 'Node',                               \n\
@@ -352,7 +384,7 @@ static char treedb_schema_controlcenter[]= "\
             'id': 'services',                                       \n\
             'pkey': 'id',                                           \n\
             'system_flag': 'sf_string_key',                         \n\
-            'topic_version': '1',                                   \n\
+            'topic_version': '2',                                   \n\
             'pkey2s': 'value',                                      \n\
             'cols': {                                               \n\
                 'id': {                                             \n\

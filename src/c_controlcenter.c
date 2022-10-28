@@ -317,11 +317,10 @@ PRIVATE int mt_play(hgobj gobj)
     PRIVATE_DATA *priv = gobj_priv_data(gobj);
 
     /*---------------------------------------*
-     *      Open treedb controlcenter
-     *---------------------------------------*/
+    *      Load schema
+    *---------------------------------------*/
     helper_quote2doublequote(treedb_schema_controlcenter);
-    json_t *jn_treedb_schema_controlcenter;
-    jn_treedb_schema_controlcenter = legalstring2json(treedb_schema_controlcenter, TRUE);
+    json_t *jn_treedb_schema_controlcenter = legalstring2json(treedb_schema_controlcenter, TRUE);
     if(!jn_treedb_schema_controlcenter) {
         /*
          *  Exit if schema fails
@@ -343,6 +342,8 @@ PRIVATE int mt_play(hgobj gobj)
         exit(-1);
     }
 
+    BOOL use_internal_schema = gobj_read_bool_attr(gobj, "use_internal_schema");
+
     const char *treedb_name = kw_get_str(
         jn_treedb_schema_controlcenter,
         "id",
@@ -350,11 +351,12 @@ PRIVATE int mt_play(hgobj gobj)
         KW_REQUIRED
     );
 
-    json_t *kw_treedb = json_pack("{s:s, s:i, s:s, s:o}",
+    json_t *kw_treedb = json_pack("{s:s, s:i, s:s, s:o, s:b}",
         "filename_mask", "%Y",
         "exit_on_error", 0,
         "treedb_name", treedb_name,
-        "treedb_schema", jn_treedb_schema_controlcenter
+        "treedb_schema", jn_treedb_schema_controlcenter,
+        "use_internal_schema", use_internal_schema
     );
     json_t *jn_resp = gobj_command(priv->gobj_treedbs,
         "open-treedb",
@@ -2065,9 +2067,6 @@ PRIVATE const EVENT input_events[] = {
     {"EV_ON_CLOSE",             0,  0,  0},
     {"EV_TTY_OPEN",             EVF_PUBLIC_EVENT,   0, 0},
     {"EV_TTY_CLOSE",            EVF_PUBLIC_EVENT,   0, 0},
-
-    {"EV_LIST_GROUPS",          EVF_PUBLIC_EVENT,  0,  0},
-    {"EV_LIST_TRACKS",          EVF_PUBLIC_EVENT,  0,  0},
 
     {"EV_AUTHZ_USER_LOGIN",     0,  0,  0},
     {"EV_AUTHZ_USER_LOGOUT",    0,  0,  0},

@@ -38,6 +38,7 @@
             │               systems [↖] │ ──┘n      │
             │                           │           │
             │  enabled                  │           │
+            │  persistent_attrs         │
             │  properties               │           │
             │  time                     │           │
             │  __sessions               │           │
@@ -249,6 +250,15 @@ static char treedb_schema_controlcenter[]= "\
                     'fillspace': 4,                                 \n\
                     'type': 'boolean',                              \n\
                     'default': true,                                \n\
+                    'flag': [                                       \n\
+                        'writable',                                 \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'persistent_attrs': {                               \n\
+                    'header': 'Persistent Attrs',                   \n\
+                    'fillspace': 10,                                \n\
+                    'type': 'dict',                                 \n\
                     'flag': [                                       \n\
                         'writable',                                 \n\
                         'persistent'                                \n\

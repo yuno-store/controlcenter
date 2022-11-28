@@ -610,9 +610,10 @@ PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj s
     hgobj child; rc_instance_t *i_hs;
     i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
     while(i_hs) {
-        json_t *jn_attrs = gobj_read_json_attr(child, "identity_card");
+        json_t *jn_attrs = json_deep_copy(gobj_read_json_attr(child, "identity_card"));
+        json_object_del(jn_attrs, "jwt");
         if(expand) {
-            json_array_append(jn_data, jn_attrs);
+            json_array_append_new(jn_data, jn_attrs);
         } else {
             json_array_append_new(jn_data,
                 json_sprintf("UUID:%s, HOSTNAME:'%s'",
@@ -620,6 +621,7 @@ PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj s
                     kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0)
                 )
             );
+            json_decref(jn_attrs);
         }
         i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
     }

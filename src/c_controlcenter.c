@@ -35,6 +35,7 @@ PRIVATE json_t *cmd_authzs(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_logout_user(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
+PRIVATE json_t *cmd_drop_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 
 PRIVATE sdata_desc_t pm_help[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
@@ -59,6 +60,11 @@ SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id (U
 SDATAPM (ASN_OCTET_STR, "cmd2agent",    0,              0,          "command to agent"),
 SDATA_END()
 };
+PRIVATE sdata_desc_t pm_drop_agent[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+    SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id (UUID or HOSTNAME)"),
+    SDATA_END()
+};
 PRIVATE sdata_desc_t pm_write_tty[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
 SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id"),
@@ -81,7 +87,11 @@ SDATACM (ASN_SCHEMA,    "help",             a_help,             pm_help,        
 SDATACM2 (ASN_SCHEMA,   "authzs",           0,                  0,              pm_authzs,      cmd_authzs,     "Authorization's help"),
 SDATACM (ASN_SCHEMA,    "logout-user",      0,                  pm_logout_user, cmd_logout_user,"Logout user"),
 SDATACM (ASN_SCHEMA,    "list-agents",      0,                  pm_list_agents, cmd_list_agents, "List connected agents"),
+
 SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,                  pm_command_agent,cmd_command_agent,"Command to agent (agent id = UUID or HOSTNAME)"),
+
+SDATACM2 (ASN_SCHEMA,   "drop-agent",       SDF_WILD_CMD,       0,                  pm_drop_agent,cmd_drop_agent,"Drop connection to agent (agent id = UUID or HOSTNAME)"),
+
 SDATACM2 (ASN_SCHEMA,   "write-tty",        0,                  a_write_tty,    pm_write_tty,   0,              "Write data to tty (internal use)"),
 
 SDATA_END()
@@ -132,6 +142,7 @@ PRIVATE sdata_desc_t authz_table[] = {
 /*-AUTHZ-- type---------name----------------flag----alias---items---description--*/
 SDATAAUTHZ (ASN_SCHEMA, "list-agents",      0,      0,      0,      "Permission to list remote agents"),
 SDATAAUTHZ (ASN_SCHEMA, "command-agent",    0,      0,      0,      "Permission to send command to remote agent"),
+SDATAAUTHZ (ASN_SCHEMA, "drop-agent",       0,      0,      0,      "Permission to drop connection to remote agent"),
 SDATAAUTHZ (ASN_SCHEMA, "logout-user",      0,      0,      0,      "Permission to logout users"),
 SDATAAUTHZ (ASN_SCHEMA, "write-tty",        0,      0,      0,      "Internal use. Feed remote consola from local keyboard"),
 
@@ -732,6 +743,76 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgob
     return msg_iev_build_webix(gobj, // Asynchronous response too
         some?0:-1,
         json_sprintf("Command sent to %d nodes", some),
+        0,
+        0,
+        kw  // owned
+    );
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PRIVATE json_t *cmd_drop_agent(hgobj gobj, const char *cmd, json_t *kw_, hgobj src)
+{
+    PRIVATE_DATA *priv = gobj_priv_data(gobj);
+    json_t *kw = json_deep_copy(kw_);
+    KW_DECREF(kw_);
+
+    /*----------------------------------------*
+     *  Check AUTHZS
+     *----------------------------------------*/
+    const char *permission = "drop-agent";
+    if(!gobj_user_has_authz(gobj, permission, kw_incref(kw), src)) {
+        return msg_iev_build_webix(
+            gobj,
+            -1,
+            json_sprintf("No permission to '%s'", permission),
+            0,
+            0,
+            kw  // owned
+        );
+    }
+
+
+    const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
+
+    json_t *jn_filter = json_pack("{s:s, s:s}",
+        "__gclass_name__", GCLASS_IEVENT_SRV_NAME,
+        "__state__", "ST_SESSION"
+    );
+    dl_list_t *dl_childs = gobj_match_childs_tree(priv->gobj_input_side, 0, jn_filter);
+
+    int some = 0;
+    hgobj child; rc_instance_t *i_hs;
+    i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
+    while(i_hs) {
+        json_t *jn_attrs = gobj_read_json_attr(child, "identity_card");
+        if(!empty_string(agent_id)) {
+            const char *id_ = kw_get_str(jn_attrs, "id", "", 0);
+            const char *host_ = kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0);
+            if(strcmp(id_, agent_id)!=0 && strcmp(host_, agent_id)!=0) {
+                i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+                continue;
+            }
+        }
+
+        gobj_send_event( // debe retornar siempre 0.
+            child,
+            "EV_DROP",
+            json_object(),
+            src
+        );
+        some++;
+
+        i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+    }
+
+    rc_free_iter(dl_childs, TRUE, 0);
+
+
+    return msg_iev_build_webix(gobj, // Asynchronous response too
+        some?0:-1,
+        json_sprintf("Drop sent to %d nodes", some),
         0,
         0,
         kw  // owned

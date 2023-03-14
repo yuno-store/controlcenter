@@ -88,9 +88,9 @@ SDATACM2 (ASN_SCHEMA,   "authzs",           0,                  0,              
 SDATACM (ASN_SCHEMA,    "logout-user",      0,                  pm_logout_user, cmd_logout_user,"Logout user"),
 SDATACM (ASN_SCHEMA,    "list-agents",      0,                  pm_list_agents, cmd_list_agents, "List connected agents"),
 
-SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,                  pm_command_agent,cmd_command_agent,"Command to agent (agent id = UUID or HOSTNAME)"),
+SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,              pm_command_agent,cmd_command_agent,"Command to agent (agent id = UUID or HOSTNAME)"),
 
-SDATACM2 (ASN_SCHEMA,   "drop-agent",       SDF_WILD_CMD,       0,                  pm_drop_agent,cmd_drop_agent,"Drop connection to agent (agent id = UUID or HOSTNAME)"),
+SDATACM2 (ASN_SCHEMA,   "drop-agent",       SDF_WILD_CMD,       0,              pm_drop_agent,cmd_drop_agent,"Drop connection to agent (agent id = UUID or HOSTNAME)"),
 
 SDATACM2 (ASN_SCHEMA,   "write-tty",        0,                  a_write_tty,    pm_write_tty,   0,              "Write data to tty (internal use)"),
 
@@ -627,9 +627,11 @@ PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj s
             json_array_append_new(jn_data, jn_attrs);
         } else {
             json_array_append_new(jn_data,
-                json_sprintf("UUID:%s, HOSTNAME:'%s'",
+                json_sprintf("UUID:%s, HOSTNAME:'%s', ROLE:%s, VERSION:%s",
                     kw_get_str(jn_attrs, "id", "", 0),
-                    kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0)
+                    kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0),
+                    kw_get_str(jn_attrs, "yuno_role", "", 0),
+                    kw_get_str(jn_attrs, "yuno_version", "", 0)
                 )
             );
             json_decref(jn_attrs);

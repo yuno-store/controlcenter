@@ -627,11 +627,11 @@ PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj s
             json_array_append_new(jn_data, jn_attrs);
         } else {
             json_array_append_new(jn_data,
-                json_sprintf("UUID:%s, HOSTNAME:'%s', ROLE:%s, VERSION:%s",
+                json_sprintf("UUID:%s (%s,%s),  HOSTNAME:'%s'",
                     kw_get_str(jn_attrs, "id", "", 0),
-                    kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0),
                     kw_get_str(jn_attrs, "yuno_role", "", 0),
-                    kw_get_str(jn_attrs, "yuno_version", "", 0)
+                    kw_get_str(jn_attrs, "yuno_version", "", 0),
+                    kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0)
                 )
             );
             json_decref(jn_attrs);

@@ -807,16 +807,6 @@ PRIVATE json_t *cmd_stats_agent(hgobj gobj, const char *cmd, json_t *kw_, hgobj 
     const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
     const char *stats2agent = kw_get_str(kw, "stats2agent", "", 0);
 
-    if(empty_string(stats2agent)) {
-        return msg_iev_build_webix(gobj,
-            -1,
-            json_string("What stats2agent?"),
-            0,
-            0,
-            kw  // owned
-        );
-    }
-
     json_t *jn_filter = json_pack("{s:s, s:s}",
         "__gclass_name__", GCLASS_IEVENT_SRV_NAME,
         "__state__", "ST_SESSION"

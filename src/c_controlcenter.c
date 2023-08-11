@@ -35,6 +35,7 @@ PRIVATE json_t *cmd_authzs(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_logout_user(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_list_agents(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
+PRIVATE json_t *cmd_stats_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 PRIVATE json_t *cmd_drop_agent(hgobj gobj, const char *cmd, json_t *kw, hgobj src);
 
 PRIVATE sdata_desc_t pm_help[] = {
@@ -58,6 +59,12 @@ PRIVATE sdata_desc_t pm_command_agent[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
 SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id (UUID or HOSTNAME)"),
 SDATAPM (ASN_OCTET_STR, "cmd2agent",    0,              0,          "command to agent"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_stats_agent[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id (UUID or HOSTNAME)"),
+SDATAPM (ASN_OCTET_STR, "stats2agent",  0,              0,          "stats to agent"),
 SDATA_END()
 };
 PRIVATE sdata_desc_t pm_drop_agent[] = {
@@ -89,6 +96,8 @@ SDATACM (ASN_SCHEMA,    "logout-user",      0,                  pm_logout_user, 
 SDATACM (ASN_SCHEMA,    "list-agents",      0,                  pm_list_agents, cmd_list_agents, "List connected agents"),
 
 SDATACM2 (ASN_SCHEMA,   "command-agent",    SDF_WILD_CMD,       0,              pm_command_agent,cmd_command_agent,"Command to agent (agent id = UUID or HOSTNAME)"),
+
+SDATACM2 (ASN_SCHEMA,   "stats-agent",      SDF_WILD_CMD,       0,              pm_stats_agent, cmd_stats_agent, "Get statistics of agent"),
 
 SDATACM2 (ASN_SCHEMA,   "drop-agent",       SDF_WILD_CMD,       0,              pm_drop_agent,cmd_drop_agent,"Drop connection to agent (agent id = UUID or HOSTNAME)"),
 
@@ -745,6 +754,107 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgob
     return msg_iev_build_webix(gobj, // Asynchronous response too
         some?0:-1,
         json_sprintf("Command sent to %d nodes", some),
+        0,
+        0,
+        kw  // owned
+    );
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PRIVATE json_t *cmd_stats_agent(hgobj gobj, const char *cmd, json_t *kw_, hgobj src)
+{
+    PRIVATE_DATA *priv = gobj_priv_data(gobj);
+    json_t *kw = json_deep_copy(kw_);
+    KW_DECREF(kw_);
+
+    /*----------------------------------------*
+     *  Check AUTHZS
+     *----------------------------------------*/
+    const char *permission = "command-agent";
+    if(!gobj_user_has_authz(gobj, permission, kw_incref(kw), src)) {
+        return msg_iev_build_webix(
+            gobj,
+            -1,
+            json_sprintf("No permission to '%s'", permission),
+            0,
+            0,
+            kw  // owned
+        );
+    }
+
+    /*----------------------------------------*
+     *  Job
+     *----------------------------------------*/
+    const char *keys2delete[] = { // WARNING parameters of command-yuno command of agent
+        "id",
+        "command",
+        "service",
+        "realm_id",
+        "yuno_role",
+        "yuno_name",
+        "yuno_release",
+        "yuno_tag",
+        "yuno_disabled",
+        "yuno_running",
+        0
+    };
+    for(int i=0; keys2delete[i]!=0; i++) {
+        json_object_del(kw, keys2delete[i]);
+    }
+
+    const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
+    const char *stats2agent = kw_get_str(kw, "stats2agent", "", 0);
+
+    if(empty_string(stats2agent)) {
+        return msg_iev_build_webix(gobj,
+            -1,
+            json_string("What stats2agent?"),
+            0,
+            0,
+            kw  // owned
+        );
+    }
+
+    json_t *jn_filter = json_pack("{s:s, s:s}",
+        "__gclass_name__", GCLASS_IEVENT_SRV_NAME,
+        "__state__", "ST_SESSION"
+    );
+    dl_list_t *dl_childs = gobj_match_childs_tree(priv->gobj_input_side, 0, jn_filter);
+
+    int some = 0;
+    hgobj child; rc_instance_t *i_hs;
+    i_hs = rc_first_instance(dl_childs, (rc_resource_t **)&child);
+    while(i_hs) {
+        json_t *jn_attrs = gobj_read_json_attr(child, "identity_card");
+        if(!empty_string(agent_id)) {
+            const char *id_ = kw_get_str(jn_attrs, "id", "", 0);
+            const char *host_ = kw_get_str(jn_attrs, "__md_iev__`ievent_gate_stack`0`host", "", 0);
+            if(strcmp(id_, agent_id)!=0 && strcmp(host_, agent_id)!=0) {
+                i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+                continue;
+            }
+        }
+
+        json_t *webix = gobj_stats( // debe retornar siempre 0.
+            child,
+            stats2agent,
+            json_incref(kw),
+            src
+        );
+        JSON_DECREF(webix);
+        some++;
+
+        i_hs = rc_next_instance(i_hs, (rc_resource_t **)&child);
+    }
+
+    rc_free_iter(dl_childs, TRUE, 0);
+
+
+    return msg_iev_build_webix(gobj, // Asynchronous response too
+        some?0:-1,
+        json_sprintf("Stats sent to %d nodes", some),
         0,
         0,
         kw  // owned

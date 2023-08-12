@@ -58,12 +58,14 @@ SDATA_END()
 PRIVATE sdata_desc_t pm_command_agent[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
 SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id (UUID or HOSTNAME)"),
+SDATAPM (ASN_OCTET_STR, "agent_service",0,              0,          "agent service"),
 SDATAPM (ASN_OCTET_STR, "cmd2agent",    0,              0,          "command to agent"),
 SDATA_END()
 };
 PRIVATE sdata_desc_t pm_stats_agent[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
 SDATAPM (ASN_OCTET_STR, "agent_id",     0,              0,          "agent id (UUID or HOSTNAME)"),
+SDATAPM (ASN_OCTET_STR, "agent_service",0,              0,          "agent service"),
 SDATAPM (ASN_OCTET_STR, "stats2agent",  0,              0,          "stats to agent"),
 SDATA_END()
 };
@@ -705,6 +707,10 @@ PRIVATE json_t *cmd_command_agent(hgobj gobj, const char *cmd, json_t *kw_, hgob
 
     const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
     const char *cmd2agent = kw_get_str(kw, "cmd2agent", "", 0);
+    const char *agent_service = kw_get_str(kw, "agent_service", "", 0);
+    if(!empty_string(agent_service)) {
+        json_object_set_new(kw, "service", json_string(agent_service));
+    }
 
     if(empty_string(cmd2agent)) {
         return msg_iev_build_webix(gobj,
@@ -806,6 +812,10 @@ PRIVATE json_t *cmd_stats_agent(hgobj gobj, const char *cmd, json_t *kw_, hgobj 
 
     const char *agent_id = kw_get_str(kw, "agent_id", "", 0);
     const char *stats2agent = kw_get_str(kw, "stats2agent", "", 0);
+    const char *agent_service = kw_get_str(kw, "agent_service", "", 0);
+    if(!empty_string(agent_service)) {
+        json_object_set_new(kw, "service", json_string(agent_service));
+    }
 
     json_t *jn_filter = json_pack("{s:s, s:s}",
         "__gclass_name__", GCLASS_IEVENT_SRV_NAME,

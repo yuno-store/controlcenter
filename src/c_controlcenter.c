@@ -1834,7 +1834,7 @@ PRIVATE int ac_treedb_node_create(hgobj gobj, const char *event, json_t *kw, hgo
             ),
             gobj
         );
-        if(json_array_size(kw_get_list(webix, "data", 0, KW_REQUIRED))==0) {
+        if(json_array_size(kw_get_dict_value(webix, "data", 0, KW_REQUIRED))==0) {
             gobj_send_event(
                 priv->gobj_authz,
                 "EV_ADD_USER",
